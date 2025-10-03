@@ -1,0 +1,12 @@
+fastapi==0.115.8  
+uvicorn[standard]==0.24.0
+python-dotenv==1.0.1 
+SQLAlchemy[asyncio]==2.0.23 
+psycopg2-binary==2.9.10
+passlib==1.7.4
+bcrypt==3.2.2 
+PyJWT==2.8.0 
+Authlib==1.5.2
+itsdangerous==2.2.0 
+redis==6.0.0
+aiosmtplib==4.0.1
