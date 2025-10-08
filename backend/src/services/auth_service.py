@@ -3,6 +3,7 @@ import secrets
 import traceback
 import random
 from sqlalchemy.orm import Session
+from sqlalchemy.future import select
 from config.db_config import Base
 from config.redis_config import redis_client
 from models.events_model import User
@@ -24,13 +25,13 @@ class AuthService:
 
         try:
             query = select(User).where(User.email == email)
-            result = await db.execute(query)
+            result = db.execute(query)
             user = result.scalar_one_or_none()
 
             if not user or not verify_password(password, user.password):
                 raise ValueError("Invalid email or password")
             
-            access_token = create_access_token(data={"sub": str(user.id)})
+            access_token = create_access_token(data={"sub": str(user.user_id)})
             return {
                 "access_token": access_token,
                 "token_type": "bearer",
@@ -55,7 +56,7 @@ class AuthService:
         try:
             email = user_info.get("email")
             query = select(User).where(User.email == email)
-            result = await db.execute(query)
+            result = db.execute(query)
             user = result.scalar_one_or_none()
 
             if not user:
@@ -71,8 +72,8 @@ class AuthService:
                     status="active"
                 )
                 db.add(new_user)
-                await db.commit()
-                await db.refresh(new_user)
+                db.commit()
+                db.refresh(new_user)
                 user = new_user
             
             token_data = {"sub": str(user.user_id)}
@@ -94,13 +95,14 @@ class AuthService:
 
     @staticmethod
     async def register(db: Session, user_data: dict):
-        first_name=user_data["first_name"],
-        last_name=user_data["last_name"],
-        email=user_data["email"],
-        phone_number=user_data.get("phone_number"), # .get() cho trường optional
-        password=user_data.get("password"),
-        role=user_data["role"],
         try:
+            first_name = user_data["first_name"]
+            last_name = user_data["last_name"]
+            email = user_data["email"]
+            password = user_data["password"] # Giờ đây password chắc chắn là string
+            phone_number = user_data.get("phone_number")
+            role = user_data["role"]
+
             user_email = db.query(User).filter(User.email == email).first()
             if user_email:
                 raise ValueError("Email already exists")
@@ -132,7 +134,7 @@ class CodeAlreadySentException(Exception):
 class VerificationCodeService:
     @staticmethod
     async def send_code(email: str):
-        existing_code = await redis_client.get(f"verify: {email}")
+        existing_code = redis_client.get(f"verify: {email}")
         if existing_code:
             return CodeAlreadySentException(detail="Verification code already sent. Please wait before retrying.")
         
