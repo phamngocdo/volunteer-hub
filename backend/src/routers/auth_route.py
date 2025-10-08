@@ -37,7 +37,6 @@ oauth.register(
 
 auth_router = APIRouter()
 
-
 @auth_router.post("/login")
 async def login(request: Request, login_data: AuthLogin, db: Session = Depends(get_db)):
     try:

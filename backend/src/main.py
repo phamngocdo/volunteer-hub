@@ -10,7 +10,6 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from routers.example_route import reviews_router
 from routers.auth_route import auth_router
-from routers.web_route import web_router
 
 
 SRC_DIR = Path(__file__).resolve().parent
@@ -27,7 +26,7 @@ app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY"))
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        f"http://localhost:{frontend_port}",
+        f"http://localhost:{backend_port}",
         f"http://127.0.0.1:{frontend_port}"
     ],
     allow_credentials=True,
@@ -37,7 +36,6 @@ app.add_middleware(
 
 app.include_router(reviews_router, prefix="/api/reviews", tags=["Reviews"])
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
-app.include_router(web_router, prefix="", tags=["Web"])
 
 def start():
     uvicorn.run(
