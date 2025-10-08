@@ -11,7 +11,7 @@ from authlib.jose import jwt
 import requests
 from services.users_service import UserService
 from config.db_config import get_db
-from services.events_service import EventService
+from services.events_service import *
 from schemas.events_schemas import *
 from utils.security import *
 

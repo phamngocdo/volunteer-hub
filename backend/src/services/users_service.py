@@ -1,7 +1,7 @@
 import traceback
 from jwt import InvalidTokenError, ExpiredSignatureError
 from sqlalchemy.orm import Session
-from models.events_model import User
+from models.user_model import User
 from utils.security import decode_token, verify_password, hash_password
 
 class UserService():

@@ -6,7 +6,8 @@ from datetime import date
 from typing import Optional, List
 from utils.exceptions import *
 
-from models.events_model import *
+from models.registration_model import EventRegistration
+from models.event_model import Event
 from schemas.events_schemas import *
 
 class EventService:

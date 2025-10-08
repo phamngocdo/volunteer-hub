@@ -3,18 +3,19 @@ import uvicorn
 from pathlib import Path
 from dotenv import load_dotenv
 
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.config.db_config import engine, Base
+from src.models import *
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-
-from routers.auth_route import auth_router
-from routers.events_route import events_router
+from src.routers.auth_route import auth_router
 
 
 SRC_DIR = Path(__file__).resolve().parent
-
-load_dotenv() 
 
 backend_port = int(os.getenv("BACKEND_PORT", 8000))
 frontend_port = int(os.getenv("FRONTEND_PORT", 3000))
@@ -39,8 +40,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
-app.include_router(events_router, prefix="/api/events", tags=["Events"])
 
 def start():
     uvicorn.run(

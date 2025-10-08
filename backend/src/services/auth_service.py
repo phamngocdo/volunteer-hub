@@ -4,9 +4,10 @@ import traceback
 import random
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
+
 from config.db_config import Base
 from config.redis_config import redis_client
-from models.events_model import User
+from models.user_model import User
 from utils.security import hash_password, verify_password, create_access_token
 from utils.gmail_sender import send_email_verification_code
 
