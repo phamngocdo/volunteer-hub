@@ -35,7 +35,7 @@ class EventSimple(EventBase):
     manager_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Schema dùng để trả về thông tin chi tiết của một event, bao gồm cả thông tin manager
 class EventDetail(EventSimple):
@@ -58,4 +58,4 @@ class RegistrationDetail(BaseModel):
     event: EventSimple
 
     class Config:
-        orm_mode = True
+        from_attributes = True

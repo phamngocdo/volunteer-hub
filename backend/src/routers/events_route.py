@@ -118,7 +118,7 @@ async def delete_event(
     if not event_to_delete:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
 
-    if event_to_delete.manager_id != current_user.id:
+    if event_to_delete.manager_id != current_user.user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this event")
     
     await EventService.delete_event(db, event_id=event_id)
@@ -142,7 +142,7 @@ async def register_for_event(
     if current_user.role != "volunteer":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
     
-    user_id = current_user.id
+    user_id = current_user._user_id
     registration = await RegistrationService.create_registration(db, event_id=event_id, user_id=user_id)
     if not registration:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Could not register for this event. You may have already registered.")
@@ -165,7 +165,7 @@ async def cancel_event_registration(
     if current_user.role != "volunteer":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
     
-    user_id = current_user.id
+    user_id = current_user.user_id
 
     success = await RegistrationService.cancel_registration(db, event_id=event_id, user_id=user_id)
     if not success:
