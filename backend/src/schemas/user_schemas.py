@@ -1,8 +1,12 @@
 from pydantic import BaseModel, EmailStr
+from typing import Optional, List
 
-class User(BaseModel):
+class UserBase(BaseModel):
+    """Các trường thông tin cơ bản của người dùng."""
     email: EmailStr
-    username: str
+    first_name: str
+    last_name: str
+    phone_number: Optional[str] = None
 
-class UserUpdate(User):
+class UserUpdate(UserBase):
     password: str

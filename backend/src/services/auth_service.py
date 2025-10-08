@@ -5,7 +5,7 @@ import random
 from sqlalchemy.orm import Session
 from config.db_config import Base
 from config.redis_config import redis_client
-from models.users_model import UserModel
+from models.events_model import User
 from utils.security import hash_password, verify_password, create_access_token
 from utils.gmail_sender import send_email_verification_code
 
@@ -15,6 +15,7 @@ class AuthService:
 class VerificationCodeService:
     pass
 
+
 class AuthService:
     @staticmethod
     async def login(db: Session, user_data: dict):
@@ -22,12 +23,11 @@ class AuthService:
         password = user_data.get("password")
 
         try:
-            user = db.query(UserModel).filter(UserModel.email == email).first()
+            query = select(User).where(User.email == email)
+            result = await db.execute(query)
+            user = result.scalar_one_or_none()
 
             if not user or not verify_password(password, user.password):
-                raise ValueError("Invalid email or password")
-
-            if not verify_password(password, user.password):
                 raise ValueError("Invalid email or password")
             
             access_token = create_access_token(data={"sub": str(user.id)})
@@ -35,8 +35,11 @@ class AuthService:
                 "access_token": access_token,
                 "token_type": "bearer",
                 "user": {
+                    "user_id": user.user_id,
                     "email": user.email,
-                    "username": user.username
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "role": user.role,
                 }
             }
         except Exception as e:
@@ -45,25 +48,44 @@ class AuthService:
 
     @staticmethod
     async def login_with_google(db: Session, email: str):
-        try:
-            user = db.query(UserModel).filter(UserModel.email == email).first()
-            if not user:
-                characters = string.ascii_letters + string.digits
-                random_pw  = ''.join(secrets.choice(characters) for i in range(20))
-                username = email.split('@')[0]
-                user = UserModel(username=username, email=email, password=hash_password(random_pw))
-                db.add(user)
-                db.commit()
-                db.refresh(user)
+        """
+        Đăng nhập/Đăng ký bằng Google.
+        """
 
-            access_token = create_access_token(data={"sub": str(user.id)})
+        try:
+            email = user_info.get("email")
+            query = select(User).where(User.email == email)
+            result = await db.execute(query)
+            user = result.scalar_one_or_none()
+
+            if not user:
+                first_name = user_info.get("first_name") or email.split('@')[0]
+                last_name = user_info.get("last_name", "")
+                random_pw = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20))
+                new_user = User(
+                    first_name=first_name, # Sử dụng tên đã qua xử lý
+                    last_name=last_name,   # Sử dụng họ đã qua xử lý
+                    email=email,
+                    password=hash_password(random_pw),
+                    role="volunteer", # Mặc định vai trò là volunteer
+                    status="active"
+                )
+                db.add(new_user)
+                await db.commit()
+                await db.refresh(new_user)
+                user = new_user
+            
+            token_data = {"sub": str(user.user_id)}
+            access_token = create_access_token(data=token_data)
+
             return {
                 "access_token": access_token,
-                "token_type": "bearer",
                 "user": {
-                    "id": user.id,
+                    "user_id": user.user_id,
                     "email": user.email,
-                    "username": user.username
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "role": user.role,
                 }
             }
         except Exception as e:
@@ -72,26 +94,27 @@ class AuthService:
 
     @staticmethod
     async def register(db: Session, user_data: dict):
-        email = user_data.get("email")
-        username = user_data.get("username")
-        phone = user_data.get("phone")
-        password = user_data.get("password")
+        first_name=user_data["first_name"],
+        last_name=user_data["last_name"],
+        email=user_data["email"],
+        phone_number=user_data.get("phone_number"), # .get() cho trường optional
+        password=user_data.get("password"),
+        role=user_data["role"],
         try:
-            user_email = db.query(UserModel).filter(UserModel.email == email).first()
+            user_email = db.query(User).filter(User.email == email).first()
             if user_email:
                 raise ValueError("Email already exists")
             
-            user_username = db.query(UserModel).filter(UserModel.username == username).first()
-            if user_username:
-                raise ValueError("Username already exists")
-            
             hash_pw = hash_password(password)
 
-            new_user = UserModel(
-                username=username,
+            new_user = User(
+                first_name=first_name,
+                last_name=last_name,
                 email=email,
-                phone=phone,
-                password=hash_pw
+                phone_number=phone_number, # .get() cho trường optional
+                password=hash_pw,
+                role=role,
+                status="active" # Mặc định là active
             )
 
             db.add(new_user)

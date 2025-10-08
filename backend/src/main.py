@@ -8,8 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 
-from routers.example_route import reviews_router
 from routers.auth_route import auth_router
+from routers.events_route import events_router
 
 
 SRC_DIR = Path(__file__).resolve().parent
@@ -39,9 +39,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.include_router(reviews_router, prefix="/api/reviews", tags=["Reviews"])
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+app.include_router(events_router, prefix="/api/events", tags=["Events"])
 
 def start():
     uvicorn.run(

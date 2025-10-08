@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    ports:
+      - "5432:5432"   # expose DB để kết nối từ host
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: volunteerhub   # tạo sẵn DB
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
