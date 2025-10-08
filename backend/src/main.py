@@ -21,8 +21,14 @@ frontend_port = int(os.getenv("FRONTEND_PORT", 3000))
 
 app = FastAPI()
 
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY"))
-
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SECRET_KEY"),
+    session_cookie="sessionid",
+    max_age=86400 * 30,
+    same_site="lax", 
+    https_only=True,
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
