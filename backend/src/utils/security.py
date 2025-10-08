@@ -33,3 +33,13 @@ def decode_token(token: str):
         raise 
     except InvalidTokenError:
         raise 
+
+# def check_role(token: str, role: str):
+#     if role in ["volunteer", "manager", "admin"]:
+#         return False
+
+#     current_user = await UserService.get_current_user(token=token, db=db)
+
+#     if current_user.role != role:
+#         return False
+#     return True

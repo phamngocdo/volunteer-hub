@@ -8,16 +8,14 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.config.db_config import engine, Base
 from src.models import *
 
-# from fastapi import FastAPI
-# from fastapi.middleware.cors import CORSMiddleware
-# from starlette.middleware.sessions import SessionMiddleware
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
+
+from src.routers.auth_route import auth_router
 
 
-# from src.routers.example_route import reviews_router
-# from src.routers.auth_route import auth_router
-
-
-# SRC_DIR = Path(__file__).resolve().parent
+SRC_DIR = Path(__file__).resolve().parent
 
 backend_port = int(os.getenv("BACKEND_PORT", 8000))
 frontend_port = int(os.getenv("FRONTEND_PORT", 3000))
@@ -43,7 +41,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(reviews_router, prefix="/api/reviews", tags=["Reviews"])
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 
 def start():
