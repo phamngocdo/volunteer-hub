@@ -6,13 +6,13 @@ from dotenv import load_dotenv
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.config.db_config import engine, Base
-from src.models import *
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from src.routers.auth_route import auth_router
+from routers.auth_route import auth_router
 
 
 SRC_DIR = Path(__file__).resolve().parent
@@ -21,6 +21,9 @@ backend_port = int(os.getenv("BACKEND_PORT", 8000))
 frontend_port = int(os.getenv("FRONTEND_PORT", 3000))
 
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory=SRC_DIR / "static"), name="static")
+
 
 app.add_middleware(
     SessionMiddleware,

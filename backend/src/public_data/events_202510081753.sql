@@ -1,6 +1,0 @@
-INSERT INTO public.events (manager_id,title,image_url,description,category,"location",start_date,end_date,status,created_at,updated_at) VALUES
-	 (4,'Dọn rác bãi biển Đà Nẵng','https://example.com/beach.jpg','Cùng nhau làm sạch bãi biển Mỹ Khê.','Môi trường','Đà Nẵng','2025-11-10','2025-11-11','approved','2025-10-08 17:46:23.529548+07','2025-10-08 17:46:23.529548+07'),
-	 (4,'Trồng cây tại công viên Thống Nhất','https://example.com/trees.jpg','Sự kiện trồng 500 cây xanh.','Môi trường','Hà Nội','2025-11-15','2025-11-15','pending','2025-10-08 17:46:23.529548+07','2025-10-08 17:46:23.529548+07'),
-	 (4,'Hiến máu nhân đạo','https://example.com/blood.jpg','Chương trình hiến máu cứu người.','Sức khỏe','TP. HCM','2025-12-01','2025-12-02','approved','2025-10-08 17:46:23.529548+07','2025-10-08 17:46:23.529548+07'),
-	 (4,'Chạy bộ gây quỹ','https://example.com/run.jpg','Chạy bộ 5km gây quỹ ủng hộ trẻ em nghèo.','Từ thiện','Huế','2025-12-10','2025-12-10','completed','2025-10-08 17:46:23.529548+07','2025-10-08 17:46:23.529548+07'),
-	 (4,'Phát cơm miễn phí','https://example.com/food.jpg','Phát cơm từ thiện tại bệnh viện.','Từ thiện','Hà Nội','2025-11-20','2025-11-20','pending','2025-10-08 17:46:23.529548+07','2025-10-08 17:46:23.529548+07');
