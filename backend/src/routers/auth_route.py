@@ -50,14 +50,6 @@ async def login(request: Request, login_data: AuthLogin, db: Session = Depends(g
         request.session["access_token"] = auth_result["access_token"]
 
         response = RedirectResponse(url="/chat", status_code=302)
-        response.set_cookie(
-            key="access_token",
-            value=auth_result["access_token"],
-            httponly=True,
-            secure=True,  
-            samesite="Lax",
-            max_age=86400 * 30  #1 month
-        )
         return response
 
     except ValueError as e:
