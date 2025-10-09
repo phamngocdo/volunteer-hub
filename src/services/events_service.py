@@ -1,6 +1,7 @@
 import traceback
 from sqlalchemy.orm import Session
 from sqlalchemy import exists
+from sqlalchemy import func
 from sqlalchemy.future import select
 from datetime import date
 from typing import Optional, List
@@ -18,7 +19,7 @@ class EventService:
         """
         try:
             query = select(Event).where(Event.event_id == event_id)
-            result = await db.execute(query)
+            result = db.execute(query)
             return result.scalar_one_or_none()
         except Exception as e:
             traceback.print_exc()
@@ -30,16 +31,20 @@ class EventService:
         Lấy danh sách các sự kiện đã được duyệt (public).
         """
         try:
-            query = select(Event).where(Event.status == "approved")
+            query = select(Event)
 
             if category:
-                query = query.where(Event.category == category)
+                # 1. Chuẩn hóa input từ người dùng
+                cleaned_category = category.lower().strip()
+                
+                # 2. So sánh input đã chuẩn hóa với cột category đã được chuyển về chữ thường trong DB
+                query = query.where(func.lower(Event.category) == cleaned_category)
             
             if start_date:
                 query = query.where(Event.start_date >= start_date)
 
             query = query.order_by(Event.start_date.asc())
-            result = await db.execute(query)
+            result = db.execute(query)
             return result.scalars().all()
         except Exception as e:
             traceback.print_exc()
@@ -57,12 +62,12 @@ class EventService:
                 status="pending"
             )
             db.add(db_event)
-            await db.commit()
-            await db.refresh(db_event)
+            db.commit()
+            db.refresh(db_event)
             return db_event
         except Exception as e:
             traceback.print_exc()
-            await db.rollback()
+            db.rollback()
             raise
     
     @staticmethod
@@ -79,12 +84,12 @@ class EventService:
             for key, value in update_data.items():
                 setattr(db_event, key, value)
             
-            await db.commit()
-            await db.refresh(db_event)
+            db.commit()
+            db.refresh(db_event)
             return db_event
         except Exception as e:
             traceback.print_exc()
-            await db.rollback()
+            db.rollback()
             raise
     
     @staticmethod
@@ -97,12 +102,12 @@ class EventService:
             if not db_event:
                 return False
             
-            await db.delete(db_event)
-            await db.commit()
+            db.delete(db_event)
+            db.commit()
             return True
         except Exception as e:
             traceback.print_exc()
-            await db.rollback()
+            db.rollback()
             raise
 
 class RegistrationService:
@@ -113,7 +118,7 @@ class RegistrationService:
         """
         try:
             query = select(EventRegistration).where(EventRegistration.registration_id == registration_id)
-            result = await db.execute(query)
+            result = db.execute(query)
             return result.scalar_one_or_none()
         except Exception:
             traceback.print_exc()
@@ -126,7 +131,7 @@ class RegistrationService:
         """
         try:
             query = select(EventRegistration).where(EventRegistration.event_id == event_id)
-            result = await db.execute(query)
+            result = db.execute(query)
             return result.scalars().all()
         except Exception:
             traceback.print_exc()
@@ -150,7 +155,7 @@ class RegistrationService:
                 EventRegistration.event_id == event_id,
                 EventRegistration.user_id == user_id
             )
-            result = await db.execute(query)
+            result = db.execute(query)
             if result.scalar_one_or_none():
                 return None  # Đã tồn tại đăng ký, không tạo mới
 
@@ -161,12 +166,12 @@ class RegistrationService:
                 status="pending"  # Trạng thái mặc định chờ manager duyệt
             )
             db.add(db_reg)
-            await db.commit()
-            await db.refresh(db_reg)
+            db.commit()
+            db.refresh(db_reg)
             return db_reg
         except Exception:
             traceback.print_exc()
-            await db.rollback()
+            db.rollback()
             raise
     
     @staticmethod
@@ -181,18 +186,18 @@ class RegistrationService:
                 EventRegistration.event_id == event_id,
                 EventRegistration.user_id == user_id
             )
-            result = await db.execute(query)
+            result = db.execute(query)
             db_reg = result.scalar_one_or_none()
 
             if not db_reg:
                 return False  # Không tìm thấy đơn đăng ký để hủy
 
-            await db.delete(db_reg)
-            await db.commit()
+            db.delete(db_reg)
+            db.commit()
             return True
         except Exception:
             traceback.print_exc()
-            await db.rollback()
+            db.rollback()
             raise
     
     @staticmethod
@@ -207,10 +212,10 @@ class RegistrationService:
                 return None  # Không tìm thấy đơn đăng ký
             
             db_reg.status = status
-            await db.commit()
-            await db.refresh(db_reg)
+            db.commit()
+            db.refresh(db_reg)
             return db_reg
         except Exception:
             traceback.print_exc()
-            await db.rollback()
+            db.rollback()
             raise

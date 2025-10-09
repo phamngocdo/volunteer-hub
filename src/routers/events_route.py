@@ -15,6 +15,8 @@ from services.events_service import *
 from schemas.events_schemas import *
 from utils.security import *
 
+
+
 SRC_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv()
@@ -42,7 +44,7 @@ async def get_event_details(event_id: int, db: Session = Depends(get_db)):
     Lấy thông tin chi tiết của một sự kiện công khai.
     """
     event = await EventService.get_event_by_id(db, event_id=event_id)
-    if not event or event.status != "approved":
+    if not event:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
     return event
 
@@ -63,10 +65,10 @@ async def create_event(
     
     current_user = await UserService.get_current_user(token=token, db=db)
 
-    if current_user.role != "manager":
+    if current_user['role'] != "manager":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
     
-    new_event = await EventService.create_event(db, event=event, manager_id=current_user.user_id)
+    new_event = await EventService.create_event(db, event=event, manager_id=current_user["user_id"])
     return new_event
 
 @events_router.put("/{event_id}", response_model=EventDetail)
@@ -85,14 +87,14 @@ async def update_event(
     
     current_user = await UserService.get_current_user(token=token, db=db)
 
-    if current_user.role != "manager":
+    if current_user["role"] != "manager":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
 
     event_to_update = await EventService.get_event_by_id(db, event_id=event_id)
     if not event_to_update:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
     
-    if event_to_update.manager_id != current_user.user_id:
+    if event_to_update.manager_id != current_user["user_id"]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to update this event")
         
     return await EventService.update_event(db, event_id=event_id, event_update=event_update)
@@ -111,14 +113,14 @@ async def delete_event(
     
     current_user = await UserService.get_current_user(token=token, db=db)
 
-    if current_user.role != "manager":
+    if current_user["role"] != "manager":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
     
     event_to_delete = await EventService.get_event_by_id(db, event_id=event_id)
     if not event_to_delete:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
 
-    if event_to_delete.manager_id != current_user.user_id:
+    if event_to_delete.manager_id != current_user["user_id"]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this event")
     
     await EventService.delete_event(db, event_id=event_id)
@@ -139,10 +141,10 @@ async def register_for_event(
 
     current_user = await UserService.get_current_user(token=token, db=db)
 
-    if current_user.role != "volunteer":
+    if current_user["role"]!= "volunteer":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
     
-    user_id = current_user._user_id
+    user_id = current_user["user_id"]
     registration = await RegistrationService.create_registration(db, event_id=event_id, user_id=user_id)
     if not registration:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Could not register for this event. You may have already registered.")
@@ -162,10 +164,10 @@ async def cancel_event_registration(
 
     current_user = await UserService.get_current_user(token=token, db=db)
 
-    if current_user.role != "volunteer":
+    if current_user["role"] != "volunteer":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
     
-    user_id = current_user.user_id
+    user_id = current_user["user_id"]
 
     success = await RegistrationService.cancel_registration(db, event_id=event_id, user_id=user_id)
     if not success:
@@ -188,9 +190,10 @@ async def get_event_registrations(
     
     current_user = await UserService.get_current_user(token=token, db=db)
 
-    if current_user.role != "manager":
+    if current_user["role"] != "manager":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
-    
+
+    current_user_id = current_user["user_id"]
     event = await EventService.get_event_by_id(db, event_id=event_id)
     if not event or event.manager_id != current_user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view registrations for this event")
@@ -212,9 +215,10 @@ async def update_registration_status(
     
     current_user = await UserService.get_current_user(token=token, db=db)
 
-    if current_user.role != "manager":
+    if current_user["role"] != "manager":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
     
+    current_user_id = current_user["user_id"]
     event = await EventService.get_event_by_id(db, event_id=registration.event_id)
     if not event or event.manager_id != current_user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to manage this registration")

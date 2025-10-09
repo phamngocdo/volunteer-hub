@@ -8,7 +8,7 @@ class UserService():
     @staticmethod
     async def get_user_by_id(user_id: int, db: Session):
         try:
-            user = db.query(User).filter(User.id == user_id).first()
+            user = db.query(User).filter(User.user_id == user_id).first()
             if user:
                 user_dict = user.__dict__.copy()
                 user_dict.pop("password", None)
@@ -33,7 +33,7 @@ class UserService():
     async def get_current_user(token: str, db: Session):
         try:
             user_id = decode_token(token).get("sub")
-            user = db.query(User).filter(User.id == user_id).first()
+            user = db.query(User).filter(User.user_id == user_id).first()
             if user:
                 user_dict = user.__dict__.copy()
                 user_dict.pop("password", None)
@@ -48,7 +48,7 @@ class UserService():
     async def update_current_user(token: str, user_data: dict, db: Session):
         try:
             user_id = decode_token(token).get("sub")
-            user = db.query(User).filter(User.id == user_id).first()
+            user = db.query(User).filter(User.user_id == user_id).first()
             if not user:
                 raise ValueError("User not found")
 
