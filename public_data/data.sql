@@ -1,122 +1,119 @@
+-- XÓA BẢNG NẾU ĐÃ TỒN TẠI (THEO THỨ TỰ PHỤ THUỘC)
+DROP TABLE IF EXISTS "notifications" CASCADE;
+DROP TABLE IF EXISTS "reacts" CASCADE;
+DROP TABLE IF EXISTS "comments" CASCADE;
+DROP TABLE IF EXISTS "posts" CASCADE;
+DROP TABLE IF EXISTS "event_registrations" CASCADE;
+DROP TABLE IF EXISTS "events" CASCADE;
+DROP TABLE IF EXISTS "users" CASCADE;
+
+-- ================= USERS =================
 CREATE TABLE "users" (
   "user_id" SERIAL PRIMARY KEY,
-  "first_name" "VARCHAR(100)",
-  "last_name" "VARCHAR(100)",
-  "email" "VARCHAR(100)" UNIQUE NOT NULL,
+  "first_name" VARCHAR(100),
+  "last_name" VARCHAR(100),
+  "email" VARCHAR(100) UNIQUE NOT NULL,
   "password" TEXT NOT NULL,
-  "phone_number" "VARCHAR(100)",
-  "role" "VARCHAR(20)",
-  "status" "VARCHAR(20)",
-  "created_at" TIMESTAMP DEFAULT (NOW()),
-  "updated_at" TIMESTAMP DEFAULT (NOW())
+  "phone_number" VARCHAR(100),
+  "role" VARCHAR(20),
+  "status" VARCHAR(20),
+  "created_at" TIMESTAMP DEFAULT NOW(),
+  "updated_at" TIMESTAMP DEFAULT NOW()
 );
 
+-- ================= EVENTS =================
 CREATE TABLE "events" (
   "event_id" SERIAL PRIMARY KEY,
   "manager_id" INT,
-  "title" "VARCHAR(200)",
-  "image_url" "VARCHAR(200)",
+  "title" VARCHAR(200),
+  "image_url" VARCHAR(200),
   "description" TEXT,
-  "category" "VARCHAR(100)",
-  "location" "VARCHAR(200)",
+  "category" VARCHAR(100),
+  "location" VARCHAR(200),
   "start_date" DATE,
   "end_date" DATE,
-  "status" "VARCHAR(20)",
-  "created_at" TIMESTAMP DEFAULT (NOW()),
-  "updated_at" TIMESTAMP DEFAULT (NOW())
+  "status" VARCHAR(20),
+  "created_at" TIMESTAMP DEFAULT NOW(),
+  "updated_at" TIMESTAMP DEFAULT NOW()
 );
 
+-- ================= EVENT_REGISTRATIONS =================
 CREATE TABLE "event_registrations" (
   "registration_id" SERIAL PRIMARY KEY,
   "event_id" INT,
   "user_id" INT,
-  "status" "VARCHAR(20)",
-  "created_at" TIMESTAMP DEFAULT (NOW()),
-  "updated_at" TIMESTAMP DEFAULT (NOW())
+  "status" VARCHAR(20),
+  "created_at" TIMESTAMP DEFAULT NOW(),
+  "updated_at" TIMESTAMP DEFAULT NOW()
 );
 
+-- ================= POSTS =================
 CREATE TABLE "posts" (
   "post_id" SERIAL PRIMARY KEY,
   "event_id" INT,
   "user_id" INT,
-  "images_url" "VARCHAR(200)",
+  "images_url" VARCHAR(200),
   "content" TEXT NOT NULL,
-  "created_at" TIMESTAMP DEFAULT (NOW()),
-  "updated_at" TIMESTAMP DEFAULT (NOW())
+  "created_at" TIMESTAMP DEFAULT NOW(),
+  "updated_at" TIMESTAMP DEFAULT NOW()
 );
 
+-- ================= COMMENTS =================
 CREATE TABLE "comments" (
   "comment_id" SERIAL PRIMARY KEY,
   "post_id" INT,
   "user_id" INT,
   "content" TEXT NOT NULL,
-  "created_at" TIMESTAMP DEFAULT (NOW()),
-  "updated_at" TIMESTAMP DEFAULT (NOW())
+  "created_at" TIMESTAMP DEFAULT NOW(),
+  "updated_at" TIMESTAMP DEFAULT NOW()
 );
 
+-- ================= REACTS =================
 CREATE TABLE "reacts" (
   "like_id" SERIAL PRIMARY KEY,
   "post_id" INT,
   "user_id" INT,
-  "category" "VARCHAR(100)",
-  "created_at" TIMESTAMP DEFAULT (NOW()),
-  "updated_at" TIMESTAMP DEFAULT (NOW())
+  "category" VARCHAR(100),
+  "created_at" TIMESTAMP DEFAULT NOW(),
+  "updated_at" TIMESTAMP DEFAULT NOW()
 );
 
+-- ================= NOTIFICATIONS =================
 CREATE TABLE "notifications" (
   "notification_id" SERIAL PRIMARY KEY,
   "user_id" INT,
   "event_id" INT,
   "message" TEXT,
   "is_read" BOOLEAN DEFAULT false,
-  "created_at" TIMESTAMP DEFAULT (NOW()),
-  "updated_at" TIMESTAMP DEFAULT (NOW())
+  "created_at" TIMESTAMP DEFAULT NOW(),
+  "updated_at" TIMESTAMP DEFAULT NOW()
 );
 
+-- ================= INDEXES =================
 CREATE UNIQUE INDEX ON "event_registrations" ("event_id", "user_id");
-
 CREATE UNIQUE INDEX ON "reacts" ("post_id", "user_id");
 
+-- ================= COMMENTS =================
 COMMENT ON COLUMN "users"."role" IS 'volunteer | manager | admin';
-
 COMMENT ON COLUMN "users"."status" IS 'active | banned | pending';
-
 COMMENT ON COLUMN "events"."status" IS 'pending | approved | rejected | completed';
-
 COMMENT ON COLUMN "event_registrations"."status" IS 'pending | approved | rejected | cancelled | completed';
-
 COMMENT ON COLUMN "reacts"."category" IS 'like | ...';
 
+-- ================= FOREIGN KEYS =================
 ALTER TABLE "events" ADD FOREIGN KEY ("manager_id") REFERENCES "users" ("user_id");
-
 ALTER TABLE "event_registrations" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("event_id");
-
 ALTER TABLE "event_registrations" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
-
 ALTER TABLE "posts" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("event_id");
-
 ALTER TABLE "posts" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
-
 ALTER TABLE "comments" ADD FOREIGN KEY ("post_id") REFERENCES "posts" ("post_id");
-
 ALTER TABLE "comments" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
-
 ALTER TABLE "reacts" ADD FOREIGN KEY ("post_id") REFERENCES "posts" ("post_id");
-
 ALTER TABLE "reacts" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
-
 ALTER TABLE "notifications" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
-
 ALTER TABLE "notifications" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("event_id");
 
-
-
-
-
-
-
-
-
+-- ================= SAMPLE DATA =================
 INSERT INTO users (first_name, last_name, email, password, phone_number, role, status)
 VALUES 
 ('Duy', 'Nguyen', 'duy@gmail.com', '123456', '0123456789', 'volunteer', 'pending'),
@@ -124,7 +121,6 @@ VALUES
 ('Minh', 'Doan', 'minh@gmail.com', '123456', '0112233445', 'volunteer', 'pending'),
 ('Trang', 'Le', 'trang@gmail.com', '123456', '0998877665', 'manager', 'active'),
 ('Tuan', 'Pham', 'tuan@gmail.com', '123456', '0909090909', 'volunteer', 'banned');
-
 
 INSERT INTO events (manager_id, title, image_url, description, category, location, start_date, end_date, status)
 VALUES
@@ -134,7 +130,6 @@ VALUES
 (4, 'Chạy bộ gây quỹ', 'https://example.com/run.jpg', 'Chạy bộ 5km gây quỹ ủng hộ trẻ em nghèo.', 'Từ thiện', 'Huế', '2025-12-10', '2025-12-10', 'completed'),
 (4, 'Phát cơm miễn phí', 'https://example.com/food.jpg', 'Phát cơm từ thiện tại bệnh viện.', 'Từ thiện', 'Hà Nội', '2025-11-20', '2025-11-20', 'pending');
 
-
 INSERT INTO event_registrations (event_id, user_id, status)
 VALUES
 (1, 1, 'approved'),
@@ -142,7 +137,6 @@ VALUES
 (2, 1, 'pending'),
 (3, 5, 'cancelled'),
 (4, 1, 'completed');
-
 
 INSERT INTO posts (event_id, user_id, images_url, content)
 VALUES
@@ -152,8 +146,6 @@ VALUES
 (4, 1, 'https://example.com/post4.jpg', 'Chạy bộ 5km cùng bạn bè thật tuyệt!'),
 (2, 3, 'https://example.com/post5.jpg', 'Mong chờ ngày trồng cây sắp tới!');
 
-
-
 INSERT INTO comments (post_id , user_id , content)
 VALUES
 (1, 2, 'Tốt lắm, cảm ơn bạn đã tham gia!'),
@@ -162,7 +154,6 @@ VALUES
 (4, 2, 'Sự kiện thật thành công!'),
 (5, 5, 'Mong được gặp mọi người ở sự kiện tới!');
 
-
 INSERT INTO reacts (post_id, user_id, category)
 VALUES
 (1, 2, 'like'),
@@ -170,7 +161,6 @@ VALUES
 (3, 1, 'wow'),
 (4, 2, 'haha'),
 (5, 5, 'like');
-
 
 INSERT INTO notifications (user_id, event_id, message, is_read)
 VALUES
