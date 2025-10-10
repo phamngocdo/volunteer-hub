@@ -1,0 +1,30 @@
+<header class="site-header">
+  <div class="header-container">
+    <button id="menu-toggle" class="mobile-toggle" aria-label="Toggle menu">☰</button>
+
+    <a class="brand" href="/">
+      <span class="logo-wrap">
+        <img src="{{ url_for('static', path='images/logo.png') }}" alt="Volunteer Hub" class="logo">
+      </span>
+      <span class="site-title">Volunteer Hub</span>
+    </a>
+
+    <nav class="main-nav" id="main-nav">
+      <ul class="nav-list">
+        <li><a href="/">Trang chủ</a></li>
+        <li><a href="/about">Về chúng tôi</a></li>
+      </ul>
+
+      <div class="mobile-actions">
+        <a href="/login" class="btn btn-ghost">Đăng nhập</a>
+        <a href="/register" class="btn btn-primary">Đăng ký</a>
+      </div>
+    </nav>
+
+    <div class="actions">
+      <a href="/login" class="btn btn-ghost">Đăng nhập</a>
+      <a href="/register" class="btn btn-primary">Đăng ký</a>
+    </div>
+  </div>
+
+</header>

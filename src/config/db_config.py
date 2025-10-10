@@ -29,12 +29,6 @@ SQLALCHEMY_DATABASE_URL = (
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False)
 
-try:
-    with engine.connect() as connection:
-        print("Connect DB successfully!")
-except Exception as e:
-    print(f"Error when connect to DB: {str(e)}")
-
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
@@ -45,3 +39,10 @@ def get_db():
         yield db
     finally:
         db.close()
+
+if __name__ == "__main__":
+    try:
+        with engine.connect() as connection:
+            print("Connect DB successfully!")
+    except Exception as e:
+        print(f"Error when connect to DB: {str(e)}")
