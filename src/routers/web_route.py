@@ -13,3 +13,6 @@ templates = Jinja2Templates(directory=SRC_DIR / "templates")
 async def root(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
+@web_router.get("/login", response_class=HTMLResponse)
+async def login(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})

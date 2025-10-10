@@ -42,6 +42,7 @@ class AuthService:
                     "first_name": user.first_name,
                     "last_name": user.last_name,
                     "role": user.role,
+                    "status": user.status
                 }
             }
         except Exception as e:
@@ -49,7 +50,7 @@ class AuthService:
             raise
 
     @staticmethod
-    async def login_with_google(db: Session, email: str):
+    async def login_with_google(db: Session, user_info: dict):
         """
         Đăng nhập/Đăng ký bằng Google.
         """
@@ -61,22 +62,8 @@ class AuthService:
             user = result.scalar_one_or_none()
 
             if not user:
-                first_name = user_info.get("first_name") or email.split('@')[0]
-                last_name = user_info.get("last_name", "")
-                random_pw = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(20))
-                new_user = User(
-                    first_name=first_name, # Sử dụng tên đã qua xử lý
-                    last_name=last_name,   # Sử dụng họ đã qua xử lý
-                    email=email,
-                    password=hash_password(random_pw),
-                    role="volunteer", # Mặc định vai trò là volunteer
-                    status="active"
-                )
-                db.add(new_user)
-                db.commit()
-                db.refresh(new_user)
-                user = new_user
-            
+                return None
+
             token_data = {"sub": str(user.user_id)}
             access_token = create_access_token(data=token_data)
 
@@ -88,6 +75,7 @@ class AuthService:
                     "first_name": user.first_name,
                     "last_name": user.last_name,
                     "role": user.role,
+                    "status": user.status
                 }
             }
         except Exception as e:
@@ -100,7 +88,7 @@ class AuthService:
             first_name = user_data["first_name"]
             last_name = user_data["last_name"]
             email = user_data["email"]
-            password = user_data["password"] # Giờ đây password chắc chắn là string
+            password = user_data["password"]
             phone_number = user_data.get("phone_number")
             role = user_data["role"]
 
@@ -114,10 +102,10 @@ class AuthService:
                 first_name=first_name,
                 last_name=last_name,
                 email=email,
-                phone_number=phone_number, # .get() cho trường optional
+                phone_number=phone_number,
                 password=hash_pw,
                 role=role,
-                status="active" # Mặc định là active
+                status="pending"
             )
 
             db.add(new_user)

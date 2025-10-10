@@ -16,6 +16,8 @@ from schemas.auth_schemas import AuthLogin, AuthRegister
 
 SRC_DIR = Path(__file__).resolve().parent.parent
 
+templates = Jinja2Templates(directory=SRC_DIR / "templates")
+
 load_dotenv()
 
 oauth = OAuth()
@@ -36,6 +38,10 @@ oauth.register(
 
 
 auth_router = APIRouter()
+
+@auth_router.get("/login", response_class=HTMLResponse)
+async def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
 
 @auth_router.post("/login")
 async def login(request: Request, login_data: AuthLogin, db: Session = Depends(get_db)):
@@ -75,25 +81,48 @@ async def login_with_google_callback(request: Request, db: Session = Depends(get
         claims = jwt.decode(token['id_token'], jwks)
         claims.validate()
 
+        print(claims)
+
         email = claims.get('email')
+        first_name = claims.get('given_name', '')
+        last_name = claims.get('family_name', '')
+        user_info = {
+            "email": email,
+            "first_name": first_name,
+            "last_name": last_name
+        }
         if not email:
             raise HTTPException(status_code=400, detail="Email not found from Google")
         
-        auth_result = await AuthService.login_with_google(db=db, email=email)
+        auth_result = await AuthService.login_with_google(db=db, user_info=user_info)
+
+        if not auth_result:
+            request.session["google_user_info"] = user_info
+            return RedirectResponse(url="/register", status_code=302)
 
         response = RedirectResponse(url="/", status_code=302)
-        response.set_cookie(key="access_token", value=auth_result["access_token"], httponly=True)
+        request.session["user"] = auth_result["user"]
+        request.session["access_token"] = auth_result["access_token"]
         return response
 
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal Server Error")
-    
+
+@auth_router.get("/register", response_class=HTMLResponse)
+async def register_page(request: Request):
+    google_info = request.session.pop("google_user_info", None)
+    return templates.TemplateResponse(
+        "register.html",
+        {
+            "request": request,
+            "prefill": google_info or {}
+        }
+    )
 
 @auth_router.post("/register")
 async def register(register_data: AuthRegister, db: Session = Depends(get_db)):
     """Đăng ký tài khoản mới."""
     try:
-        # Ánh xạ dữ liệu từ schema sang cấu trúc DB của bạn
         user_data = {
             "first_name": register_data.first_name,
             "last_name": register_data.last_name,
@@ -103,7 +132,7 @@ async def register(register_data: AuthRegister, db: Session = Depends(get_db)):
             "role": register_data.role
         }
         await AuthService.register(db=db, user_data=user_data)
-        return JSONResponse(status_code=status.HTTP_201_CREATED, content={"message": "Registration successful. Please login."})
+        return RedirectResponse(url="/auth/login", status_code=302)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
     except Exception:
