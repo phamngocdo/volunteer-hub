@@ -2,7 +2,7 @@ from pathlib import Path
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from utils.security import decode_token
+from src.utils.security import decode_token
 
 web_router = APIRouter()
 
