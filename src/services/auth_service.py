@@ -5,11 +5,11 @@ import random
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
 
-from config.db_config import Base
-from config.redis_config import redis_client
-from models.user_model import User
-from utils.security import hash_password, verify_password, create_access_token
-from utils.gmail_sender import send_email_verification_code
+from src.config.db_config import Base
+from src.config.redis_config import redis_client
+from src.models.user_model import User
+from src.utils.security import hash_password, verify_password, create_access_token
+from src.utils.gmail_sender import send_email_verification_code
 
 class AuthService:
     pass

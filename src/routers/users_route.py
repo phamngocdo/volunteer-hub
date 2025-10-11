@@ -2,10 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from jwt import InvalidTokenError, ExpiredSignatureError
 from sqlalchemy.orm import Session
-from services.users_service import UserService
-from schemas.user_schemas import UserUpdate
+from src.services.users_service import UserService
+from src.schemas.user_schemas import UserUpdate, HistoryItem
+from typing import Optional, List
 
-from config.db_config import get_db
+from src.config.db_config import get_db
 
 users_router = APIRouter()
 
@@ -41,3 +42,24 @@ async def update_password(data: UserUpdate, request: Request, db: Session = Depe
         raise HTTPException(status_code=401, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
+
+@users_router.get("/me/history", response_model=List[HistoryItem])
+async def get_my_participation_history(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy danh sách lịch sử các sự kiện đã đăng ký/tham gia của người dùng.
+    """
+    user = request.session.get("user")
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    role = user["role"]
+    if role != "volunteer":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view history")
+    
+    user_id = user["user_id"]
+
+    history_items = await UserService.get_user_history(db=db, user_id=user_id)
+    return history_items
