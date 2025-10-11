@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="{{ url_for('static', path='images/logo.png') }}" type="image/x-icon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang chủ</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/header.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/home.css') }}">
+
+</head>
+
+<body>
+
+  {% include 'header.html' %}
+
+  <main class="main-content">
+    <section class="hero">
+      <h1>Chào mừng đến với Volunteer Hub</h1>
+      <p>Hãy cùng tham gia các hoạt động tình nguyện và kết nối cộng đồng!</p>
+      <a href="/register" class="btn btn-primary">Tham gia ngay</a>
+    </section>
+
+    <section class="features">
+      <h2>Tính năng nổi bật</h2>
+      <ul>
+        <li>Kết nối các dự án tình nguyện</li>
+        <li>Tìm kiếm cơ hội phù hợp</li>
+        <li>Quản lý lịch sử tham gia</li>
+      </ul>
+    </section>
+  </main>
+  {% include 'footer.html' %}
+</body>
+
+</html>

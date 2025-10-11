@@ -1,0 +1,26 @@
+<header class="site-header">
+  <div class="header-container">
+    <button id="menu-toggle" class="mobile-toggle" aria-label="Toggle menu">☰</button>
+
+    <a class="brand" href="/">
+      <span class="logo-wrap">
+        <img src="{{ url_for('static', path='images/logo.png') }}" alt="Volunteer Hub" class="logo">
+      </span>
+      <span class="site-title">Volunteer Hub</span>
+    </a>
+
+    <nav class="main-nav" id="main-nav">
+      <ul class="nav-list">
+      </ul>
+
+      <div class="mobile-actions" id="mobile-actions">
+      </div>
+    </nav>
+
+    <div class="actions" id="actions"></div>
+    <div class="user-area" id="user-area"></div>
+  </div>
+</header>
+
+<div id="overlay"></div>
+<script src="{{ url_for('static', path='js/header.js') }}"></script>
