@@ -9,11 +9,11 @@ from authlib.integrations.starlette_client import OAuth
 from sqlalchemy.orm import Session
 from authlib.jose import jwt
 import requests
-from services.users_service import UserService
-from config.db_config import get_db
-from services.events_service import *
-from schemas.events_schemas import *
-from utils.security import *
+from src.services.users_service import UserService
+from src.config.db_config import get_db
+from src.services.events_service import *
+from src.schemas.events_schemas import *
+from src.utils.security import *
 
 
 
@@ -59,11 +59,9 @@ async def create_event(
     """
     Tạo một sự kiện mới. Chỉ có 'manager' mới có quyền này.
     """
-    token = request.session.get("access_token")
-    if not token:
+    current_user = request.session.get("user")
+    if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    current_user = await UserService.get_current_user(token=token, db=db)
 
     if current_user['role'] != "manager":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
@@ -81,11 +79,9 @@ async def update_event(
     """
     Cập nhật thông tin sự kiện. Chỉ manager tạo ra sự kiện mới có quyền.
     """
-    token = request.session.get("access_token")
-    if not token:
+    current_user = request.session.get("user")
+    if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    current_user = await UserService.get_current_user(token=token, db=db)
 
     if current_user["role"] != "manager":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
@@ -107,11 +103,9 @@ async def delete_event(
     db: Session = Depends(get_db),
 ):
     """Xóa một sự kiện. Chỉ manager tạo ra sự kiện mới có quyền."""
-    token = request.session.get("access_token")
-    if not token:
+    current_user = request.session.get("user")
+    if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    current_user = await UserService.get_current_user(token=token, db=db)
 
     if current_user["role"] != "manager":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
@@ -135,11 +129,9 @@ async def register_for_event(
     db: Session = Depends(get_db),
 ):
     """Tình nguyện viên đăng ký tham gia sự kiện."""
-    token = request.session.get("access_token")
-    if not token:
+    current_user = request.session.get("user")
+    if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-
-    current_user = await UserService.get_current_user(token=token, db=db)
 
     if current_user["role"]!= "volunteer":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
@@ -158,11 +150,9 @@ async def cancel_event_registration(
     db: Session = Depends(get_db),
 ):
     """Tình nguyện viên hủy đăng ký sự kiện."""
-    token = request.session.get("access_token")
-    if not token:
+    current_user = request.session.get("user")
+    if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-
-    current_user = await UserService.get_current_user(token=token, db=db)
 
     if current_user["role"] != "volunteer":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
@@ -184,11 +174,9 @@ async def get_event_registrations(
     db: Session = Depends(get_db),
 ):
     """Manager xem danh sách tình nguyện viên đã đăng ký sự kiện của mình."""
-    token = request.session.get("access_token")
-    if not token:
+    current_user = request.session.get("user")
+    if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    current_user = await UserService.get_current_user(token=token, db=db)
 
     if current_user["role"] != "manager":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
@@ -209,11 +197,9 @@ async def update_registration_status(
     db: Session = Depends(get_db),
 ):
     """Manager duyệt, từ chối, hoặc đánh dấu hoàn thành cho một đơn đăng ký."""
-    token = request.session.get("access_token")
-    if not token:
+    current_user = request.session.get("user")
+    if not current_user:
         raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    current_user = await UserService.get_current_user(token=token, db=db)
 
     if current_user["role"] != "manager":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")

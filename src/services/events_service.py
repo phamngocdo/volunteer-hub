@@ -5,11 +5,11 @@ from sqlalchemy import func
 from sqlalchemy.future import select
 from datetime import date
 from typing import Optional, List
-from utils.exceptions import *
+from src.utils.exceptions import *
 
-from models.registration_model import EventRegistration
-from models.event_model import Event
-from schemas.events_schemas import *
+from src.models.registration_model import EventRegistration
+from src.models.event_model import Event
+from src.schemas.events_schemas import *
 
 class EventService:
     @staticmethod

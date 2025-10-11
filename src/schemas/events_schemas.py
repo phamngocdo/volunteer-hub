@@ -1,17 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from datetime import date, datetime
 from typing import Optional, List
-from schemas.user_schemas import UserBase
-
-# Các trường chung của một sự kiện
-class EventBase(BaseModel):
-    title: str
-    description: Optional[str] = None
-    category: str
-    location: str
-    start_date: date
-    end_date: date
-    image_url: Optional[str] = None
+from src.schemas.base_schemas import EventBase, UserBase
 
 # Schema dùng để validate dữ liệu đầu vào khi TẠO event
 class EventCreate(EventBase):

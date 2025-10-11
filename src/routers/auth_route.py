@@ -11,9 +11,9 @@ from authlib.jose import jwt
 import requests
 import traceback
 
-from config.db_config import get_db
-from services.auth_service import AuthService, VerificationCodeService, CodeAlreadySentException
-from schemas.auth_schemas import AuthLogin, AuthRegister
+from src.config.db_config import get_db
+from src.services.auth_service import AuthService, VerificationCodeService, CodeAlreadySentException
+from src.schemas.auth_schemas import AuthLogin, AuthRegister
 
 SRC_DIR = Path(__file__).resolve().parent.parent
 
