@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" href="{{ url_for('static', path='images/logo.png') }}" type="image/x-icon">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng nhập</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/header.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/auth.css') }}">
+</head>
+
+<body>
+  {% include 'header.html' %}
+
+  <main class="login-container">
+    <div class="login-box">
+      <h2>Đăng nhập</h2>
+      <form class="login-form" action="/auth/login" method="post">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="Nhập email của bạn" required>
+
+        <label for="password">Mật khẩu</label>
+        <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" required>
+
+        <button type="submit" class="btn btn-login">Đăng nhập</button>
+
+        <p class="divider">hoặc</p>
+
+
+        <a href="/auth/google" class="btn btn-google">
+          <img src="{{ url_for('static', path='images/google.png') }}" class="google-icon" alt="Google">
+          Đăng nhập bằng Google
+        </a>
+      </form>
+
+      <div class="extra-links">
+        <p>Chưa có tài khoản? <a href="/register">Đăng ký ngay</a></p>
+      </div>
+    </div>
+  </main>
+
+
+  {% include 'footer.html' %}
+  <script src="{{ url_for('static', path='js/login.js') }}"></script>
+</body>
+
+</html>

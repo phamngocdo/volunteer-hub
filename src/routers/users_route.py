@@ -20,10 +20,7 @@ async def get_current_user(request: Request, db: Session = Depends(get_db)):
 
         return user
     except (ExpiredSignatureError, InvalidTokenError) as e:
-        raise HTTPException(status_code=401, detail=f"Unauthorized: {e}")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
-    
+        raise HTTPException(status_code=401, detail=f"Unauthorized: {e}")    
 
 
 @users_router.put("/me")

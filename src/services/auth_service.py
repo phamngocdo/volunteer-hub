@@ -50,13 +50,12 @@ class AuthService:
             raise
 
     @staticmethod
-    async def login_with_google(db: Session, user_info: dict):
+    async def login_with_google(db: Session, email: str):
         """
         Đăng nhập/Đăng ký bằng Google.
         """
 
         try:
-            email = user_info.get("email")
             query = select(User).where(User.email == email)
             result = db.execute(query)
             user = result.scalar_one_or_none()

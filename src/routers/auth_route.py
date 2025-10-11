@@ -9,6 +9,7 @@ from authlib.integrations.starlette_client import OAuth
 from sqlalchemy.orm import Session
 from authlib.jose import jwt
 import requests
+import traceback
 
 from config.db_config import get_db
 from services.auth_service import AuthService, VerificationCodeService, CodeAlreadySentException
@@ -39,10 +40,6 @@ oauth.register(
 
 auth_router = APIRouter()
 
-@auth_router.get("/login", response_class=HTMLResponse)
-async def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
-
 @auth_router.post("/login")
 async def login(request: Request, login_data: AuthLogin, db: Session = Depends(get_db)):
     try:
@@ -55,7 +52,7 @@ async def login(request: Request, login_data: AuthLogin, db: Session = Depends(g
         request.session["user"] = auth_result["user"]
         request.session["access_token"] = auth_result["access_token"]
 
-        return JSONResponse(status_code=status.HTTP_200_OK, content=auth_result)
+        return RedirectResponse(url="/", status_code=302)
 
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
@@ -74,50 +71,34 @@ async def login_with_google(request: Request):
 async def login_with_google_callback(request: Request, db: Session = Depends(get_db)):
     try:
         token = await oauth.google.authorize_access_token(request)
-
         jwks_url = "https://www.googleapis.com/oauth2/v3/certs"
         jwks = requests.get(jwks_url).json()
 
         claims = jwt.decode(token['id_token'], jwks)
         claims.validate()
 
-        print(claims)
-
         email = claims.get('email')
-        first_name = claims.get('given_name', '')
-        last_name = claims.get('family_name', '')
-        user_info = {
-            "email": email,
-            "first_name": first_name,
-            "last_name": last_name
-        }
+
         if not email:
             raise HTTPException(status_code=400, detail="Email not found from Google")
         
-        auth_result = await AuthService.login_with_google(db=db, user_info=user_info)
+        auth_result = await AuthService.login_with_google(db=db, email=email)
 
         if not auth_result:
-            request.session["google_user_info"] = user_info
-            return RedirectResponse(url="/register", status_code=302)
+            first_name = claims.get('given_name', '')
+            last_name = claims.get('family_name', '')
+            user_info = {"email": email, "first_name": first_name, "last_name": last_name}
 
-        response = RedirectResponse(url="/", status_code=302)
+            request.session["google_user_info"] = user_info
+            return RedirectResponse(url="/complete-profile", status_code=302)
+
         request.session["user"] = auth_result["user"]
         request.session["access_token"] = auth_result["access_token"]
-        return response
+        return RedirectResponse(url="/", status_code=302)
 
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail="Internal Server Error")
-
-@auth_router.get("/register", response_class=HTMLResponse)
-async def register_page(request: Request):
-    google_info = request.session.pop("google_user_info", None)
-    return templates.TemplateResponse(
-        "register.html",
-        {
-            "request": request,
-            "prefill": google_info or {}
-        }
-    )
 
 @auth_router.post("/register")
 async def register(register_data: AuthRegister, db: Session = Depends(get_db)):
@@ -132,7 +113,7 @@ async def register(register_data: AuthRegister, db: Session = Depends(get_db)):
             "role": register_data.role
         }
         await AuthService.register(db=db, user_data=user_data)
-        return RedirectResponse(url="/auth/login", status_code=302)
+        return RedirectResponse(url="/login", status_code=302)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
     except Exception:
@@ -143,18 +124,12 @@ async def register(register_data: AuthRegister, db: Session = Depends(get_db)):
 @auth_router.post("/logout")
 async def logout(request: Request):
     try:
-        if "user" in request.session:
-            del request.session["user"]
-        
-        if "access_token" in request.session:
-            del request.session["access_token"]
-
-        response = RedirectResponse(url="/auth/login", status_code=302)
+        request.session.pop("user", None)
+        request.session.pop("access_token", None)
+        response = JSONResponse(content={"detail": "Logged out"})
         response.delete_cookie(key="access_token", path="/", httponly=True)
-
         return response
-
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=500, detail="Internal Server Error")
     
 

@@ -5,14 +5,13 @@ from dotenv import load_dotenv
 
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from src.config.db_config import engine, Base
-
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from routers.auth_route import auth_router
+from routers.users_route import users_router
 from routers.events_route import events_router
 from routers.web_route import web_router
 
@@ -46,6 +45,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+app.include_router(users_router, prefix="/api/users", tags=["User"])
 app.include_router(events_router, prefix="/api/events", tags=["Event"])
 app.include_router(web_router, prefix="", tags=["Web"])
 

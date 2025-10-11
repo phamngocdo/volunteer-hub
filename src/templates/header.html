@@ -11,20 +11,16 @@
 
     <nav class="main-nav" id="main-nav">
       <ul class="nav-list">
-        <li><a href="/">Trang chủ</a></li>
-        <li><a href="/about">Về chúng tôi</a></li>
       </ul>
 
-      <div class="mobile-actions">
-        <a href="/login" class="btn btn-ghost">Đăng nhập</a>
-        <a href="/register" class="btn btn-primary">Đăng ký</a>
+      <div class="mobile-actions" id="mobile-actions">
       </div>
     </nav>
 
-    <div class="actions">
-      <a href="/login" class="btn btn-ghost">Đăng nhập</a>
-      <a href="/register" class="btn btn-primary">Đăng ký</a>
-    </div>
+    <div class="actions" id="actions"></div>
+    <div class="user-area" id="user-area"></div>
   </div>
-
 </header>
+
+<div id="overlay"></div>
+<script src="{{ url_for('static', path='js/header.js') }}"></script>
