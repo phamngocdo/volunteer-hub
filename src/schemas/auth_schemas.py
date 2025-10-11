@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from schemas.user_schemas import UserBase
+from src.schemas.user_schemas import UserBase
 from typing import Literal
 
 class AuthLogin(BaseModel):
