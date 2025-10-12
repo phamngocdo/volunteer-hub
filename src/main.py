@@ -13,6 +13,10 @@ from starlette.middleware.sessions import SessionMiddleware
 from routers.auth_route import auth_router
 from routers.users_route import users_router
 from routers.events_route import events_router
+from routers.posts_route import posts_router
+from routers.comments_route import comments_router
+from routers.reacts_route import reacts_router
+from routers.notifications_route import notifications_router
 from routers.web_route import web_router
 
 SRC_DIR = Path(__file__).resolve().parent
@@ -47,6 +51,10 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(users_router, prefix="/api/users", tags=["User"])
 app.include_router(events_router, prefix="/api/events", tags=["Event"])
+app.include_router(posts_router, prefix="/api/posts", tags=["Post"])
+app.include_router(comments_router, prefix="/api/comments", tags=["Comment"])
+app.include_router(reacts_router, prefix="/api/reacts", tags=["React"])
+app.include_router(notifications_router, prefix="/api/notifications", tags=["Notification"])
 app.include_router(web_router, prefix="", tags=["Web"])
 
 
