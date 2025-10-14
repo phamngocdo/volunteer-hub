@@ -104,7 +104,7 @@ class AuthService:
                 phone_number=phone_number,
                 password=hash_pw,
                 role=role,
-                status="pending"
+                status="active"
             )
 
             db.add(new_user)

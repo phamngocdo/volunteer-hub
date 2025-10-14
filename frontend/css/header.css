@@ -61,6 +61,7 @@
   padding: 8px 12px;
   border-radius: 8px;
   transition: background-color .15s ease;
+
 }
 
 .nav-list a:hover {
@@ -207,7 +208,7 @@
 }
 
 
-@media (max-width: 860px) {
+@media (max-width: 945px) {
   .header-container {
     justify-content: center;
   }
@@ -248,6 +249,7 @@
     transition: left .28s cubic-bezier(.2, .9, .2, 1);
     flex-direction: column;
     justify-content: flex-start;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
     z-index: 2000;
   }
 
@@ -281,13 +283,5 @@
     transition: none;
   }
 
-  .mobile-actions .btn:hover,
-  .mobile-actions .btn-ghost:hover,
-  .mobile-actions .btn-primary:hover {
-    background: inherit !important;
-    color: inherit !important;
-    transform: none !important;
-    filter: none !important;
-    box-shadow: none !important;
-  }
+
 }

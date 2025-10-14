@@ -1,10 +1,20 @@
-document.addEventListener("DOMContentLoaded", async () => {
+async function loadComponent(id, path) {
+  const container = document.getElementById(id);
+  const res = await fetch(path);
+  container.innerHTML = await res.text();
+}
+
+await loadComponent("header-container", "./components/header.html");
+await initHeader();
+
+export async function initHeader() {
   const toggle = document.getElementById("menu-toggle");
   const nav = document.getElementById("main-nav");
   const overlay = document.getElementById("overlay");
   const navList = document.querySelector(".nav-list");
   const actions = document.getElementById("actions");
   const mobileActions = document.getElementById("mobile-actions");
+  const userArea = document.getElementById("user-area");
 
   const menuByRole = {
     volunteer: [
@@ -16,14 +26,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     manager: [
       { href: "/", label: "Trang chủ" },
       { href: "/event-wall", label: "Kênh trao đổi" },
-      { href: "/manage-events", label: "Quản lý sự kiện" },
+      { href: "/event-manager", label: "Quản lý sự kiện" },
       { href: "/contact", label: "Liên hệ" },
       { href: "/about", label: "Về chúng tôi" },
     ],
     admin: [
       { href: "/", label: "Trang chủ" },
-      { href: "/manage-events", label: "Quản lý sự kiện" },
-      { href: "/manage-users", label: "Quản lý người dùng" },
+      { href: "/event-admin", label: "Quản lý sự kiện" },
+      { href: "/user-admin", label: "Quản lý người dùng" },
     ],
   };
 
@@ -58,7 +68,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function loadUserHeader() {
     try {
-      const res = await fetch("/api/users/me");
+      const token = localStorage.getItem("access_token");
+      const token_type = localStorage.getItem("token_type");
+      const res = await fetch("http://localhost:8000/api/users/me", {
+        headers: { "Authorization": `${token_type} ${token}` }
+      });
       if (res.status === 401) { renderGuestActions(); renderMenu("volunteer"); return; }
       if (!res.ok) throw new Error(`Unexpected status: ${res.status}`);
       const user = await res.json();
@@ -76,37 +90,89 @@ document.addEventListener("DOMContentLoaded", async () => {
     (menuByRole[role] || menuByRole["volunteer"]).forEach(item => {
       const li = document.createElement("li");
       const a = document.createElement("a");
-      a.href = item.href; a.textContent = item.label;
+      a.href = item.href;
+      a.textContent = item.label;
       if (location.pathname === item.href) li.classList.add("active");
-      li.appendChild(a); navList.appendChild(li);
+      li.appendChild(a);
+      navList.appendChild(li);
     });
   }
 
   function renderGuestActions() {
-    const html = `<a href="/login" class="btn btn-ghost">Đăng nhập</a><a href="/register" class="btn btn-primary">Đăng ký</a>`;
-    actions.innerHTML = html; mobileActions.innerHTML = html;
+    const html = `<a href="/login" class="btn btn-ghost">Đăng nhập</a>
+                  <a href="/register" class="btn btn-primary">Đăng ký</a>`;
+    actions.innerHTML = html;
+    mobileActions.innerHTML = html;
   }
 
   function renderUserActions(role, user) {
-    const avatarUrl = user.avatar || "/static/images/default-avatar.png";
+    const avatarUrl = "../assets/default-avatar.png";
     const html = `
       <button class="notification-btn" aria-label="Thông báo">🔔<span class="notification-count">3</span></button>
       <div class="user-avatar user-menu-toggle"><img src="${avatarUrl}" alt="Avatar"></div>
-      <div class="user-dropdown">${role === "volunteer" ? '<a href="/history">Lịch sử tham gia</a>' : ''}<a href="/profile">Thông tin</a><button class="logout-btn">Đăng xuất</button></div>
+      <div class="user-dropdown">
+        ${role === "volunteer" ? '<a href="/history">Lịch sử tham gia</a>' : ''}
+        <a href="/profile">Thông tin</a>
+        <button class="logout-btn">Đăng xuất</button>
+      </div>
     `;
-    const userArea = document.getElementById("user-area");
     userArea.innerHTML = html;
 
     const logoutBtn = userArea.querySelector(".logout-btn");
     if (logoutBtn) logoutBtn.addEventListener("click", async () => {
       try {
-        const res = await fetch("/auth/logout", { method: "POST" });
-        if (res.ok) location.href = "/login"; else alert("Đăng xuất thất bại");
-      } catch { alert("Lỗi kết nối"); }
+        const token = localStorage.getItem("access_token");
+        const token_type = localStorage.getItem("token_type");
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("token_type");
+        const res = await fetch("http://localhost:8000/auth/logout", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Authorization": `${token_type} ${token}` }
+
+        });
+        if (res.ok) location.href = "/login";
+        else alert("Đăng xuất thất bại");
+      } catch {
+        alert("Lỗi kết nối");
+      }
     });
 
     const avatar = userArea.querySelector(".user-menu-toggle");
     const dropdown = avatar.nextElementSibling;
     avatar.addEventListener("click", e => { e.stopPropagation(); dropdown.classList.toggle("show"); });
   }
+}
+
+await loadComponent("footer-container", "./components/footer.html");
+
+const main = document.getElementById("main-content");
+
+export async function navigateTo(page) {
+  const res = await fetch(`./pages/${page}.html`);
+  const html = await res.text();
+  main.innerHTML = html;
+  window.history.pushState({}, "", `/${page}`);
+
+  const script = document.createElement("script");
+  script.src = `./js/${page}.js`;
+  script.type = "module";
+  document.body.appendChild(script);
+}
+
+document.body.addEventListener("click", (e) => {
+  const link = e.target.closest("a");
+  if (link && link.getAttribute("href")?.startsWith("/")) {
+    e.preventDefault();
+    const page = link.getAttribute("href").replace("/", "");
+    navigateTo(page || "home");
+  }
 });
+
+window.addEventListener("popstate", () => {
+  const path = window.location.pathname.replace("/", "") || "home";
+  navigateTo(path);
+});
+
+const currentPath = window.location.pathname.replace("/", "") || "home";
+navigateTo(currentPath);

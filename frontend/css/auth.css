@@ -129,32 +129,6 @@ select:hover {
   background-color: #2c2c2c;
 }
 
-.btn-google {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  background-color: #fff;
-  color: var(--fg);
-  transition: background 0.2s ease, transform 0.1s ease;
-}
-
-.btn-google:hover {
-  background: rgba(0, 0, 0, 0.04);
-  transform: translateY(-1px);
-}
-
-.btn-google i {
-  font-size: 18px;
-  color: #db4437;
-}
-
-.google-icon {
-  width: 18px;
-  height: 18px;
-}
-
 .divider {
   color: var(--muted);
   font-size: 13px;

@@ -1,0 +1,26 @@
+{
+  "name": "volunteer-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Volunteer Hub — served with live-server",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx live-server ./ --port=3000 --entry-file=index.html --no-browser",
+    "dev": "npx live-server ./src --port=3000 --watch=src",
+    "test": "echo \"No tests configured\" && exit 0"
+  },
+  "keywords": [
+    "frontend",
+    "html",
+    "css",
+    "javascript",
+    "fastapi"
+  ],
+  "author": "phamngocdo, quangduy164, minhpd2004",
+  "license": "ISC",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
