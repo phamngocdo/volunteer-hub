@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Request, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from jwt import InvalidTokenError, ExpiredSignatureError
 
+from typing import List, Optional
+import json
 from src.config.db_config import get_db
 from src.services.posts_service import PostService
 from src.schemas.posts_schemas import *
+from src.config.redis_config import redis_client as r
 
 posts_router = APIRouter()
 # trả về danh sách các đối tượng postdetail
@@ -22,22 +25,67 @@ async def create_post(request: Request, event_id: int, post: PostCreate, db: Ses
     """
     Đăng bài viết mới của 1 sự kiện
     """
-    user = request.session.get("user")
-    if not user:
+    #Lấy token
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Unauthorized")
-    new_post = await PostService.create_post(db, event_id, user["user_id"], post)
-    return new_post
+    token = auth_header.split(" ")[1]
+    #Lấy thông tin user trong Redis
+    session_json = await r.get(token)
+    if not session_json:
+        raise HTTPException(status_code=401, detail="Session expired or invalid")
+    
+    try:
+        user = json.loads(session_json)
+        # Kiểm tra nếu bị cấm
+        if user.get("status") == "banned":
+            raise HTTPException(status_code=403, detail="Your account has been banned")
+        user_id = user.get("user_id")
+        new_post = await PostService.create_post(db, event_id, user_id, post)
+        return new_post
+    except (ExpiredSignatureError, InvalidTokenError) as e:
+        raise HTTPException(status_code=401, detail=f"Unauthorized: {e}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
 
 @posts_router.delete("/{post_id}")
 async def delete_post(request: Request, post_id: int, db: Session = Depends(get_db)):
     """
     Xóa bài post khỏi database nếu bài viết thuộc về user tương ứng.
     """
-    user = request.session.get("user")
-    if not user:
+    # --- Lấy token ---
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Unauthorized")
-    success = await PostService.delete_post(db, post_id, user["user_id"])
-    if not success:
-        raise HTTPException(status_code=403, detail="Post not found or unauthorized")
-    return {"detail": "Post deleted successfully"}
+
+    token = auth_header.split(" ")[1]
+
+    # --- Lấy thông tin user trong Redis ---
+    session_json = await r.get(token)
+    if not session_json:
+        raise HTTPException(status_code=401, detail="Session expired or invalid")
+
+    try:
+        user = json.loads(session_json)
+
+        # Kiểm tra nếu bị cấm
+        if user.get("status") == "banned":
+            raise HTTPException(status_code=403, detail="Your account has been banned")
+
+        user_id = user.get("user_id")
+
+        success = await PostService.delete_post(db, post_id, user_id)
+        if not success:
+            raise HTTPException(status_code=403, detail="Post not found or unauthorized")
+
+        return {"detail": "Post deleted successfully"}
+
+    except (ExpiredSignatureError, InvalidTokenError) as e:
+        raise HTTPException(status_code=401, detail=f"Unauthorized: {e}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
 

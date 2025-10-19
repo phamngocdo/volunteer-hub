@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
+from fastapi import HTTPException
+from src.models.post_model import Post
 from src.models.react_model import React
 import traceback
 
@@ -10,6 +12,11 @@ class ReactService:
         Tạo hoặc cập nhật cảm xúc cho bài post.
         """
         try:
+            # Kiểm tra xem bài post có tồn tại không
+            post = db.query(Post).filter(Post.post_id == post_id).first()
+            if not post:
+                raise HTTPException(status_code=404, detail="Post not found")
+
             # Kiểm tra xem đã react chưa
             query = select(React).where(React.post_id == post_id, React.user_id == user_id)
             existing_react = db.execute(query).scalar_one_or_none()
@@ -27,7 +34,8 @@ class ReactService:
             db.commit()
             db.refresh(new_react)
             return new_react
-
+        except HTTPException:
+            raise
         except Exception as e:
             traceback.print_exc()
             db.rollback()

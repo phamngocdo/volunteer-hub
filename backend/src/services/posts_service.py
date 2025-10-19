@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
 from src.models.post_model import Post
+from src.services.events_service import EventService
+from fastapi import HTTPException
 from src.models.react_model import React
 import traceback
 
@@ -23,11 +25,20 @@ class PostService:
         Tạo 1 post mới trong database.
         """
         try:      
+            # Kiểm tra sự kiện tồn tại và phải được 'approved'
+            event = await EventService.get_event_by_id(db, event_id)
+            if not event:
+                raise HTTPException(status_code=404, detail="Event not found")
+            if event.status.lower() != "approved":
+                raise HTTPException(status_code=403, detail="Event not approved yet")
+            # Nếu thỏa mãn thì tạo post
             db_post = Post(event_id=event_id, user_id=user_id, **post.dict())
             db.add(db_post)
             db.commit()
             db.refresh(db_post)
             return db_post
+        except HTTPException:
+            raise
         except Exception as e:
             traceback.print_exc()
             db.rollback()
