@@ -37,7 +37,8 @@ async def login(request: Request, login_data: AuthLogin, db: Session = Depends(g
 
         session_data = {
             "user_id": auth_result["user"]["user_id"],
-            "email": auth_result["user"]["email"]
+            "email": auth_result["user"]["email"],
+            "role": auth_result["user"]["role"]
         }
         try:
             await r.set(token, json.dumps(session_data), ex=SESSION_EXPIRE_SECONDS)

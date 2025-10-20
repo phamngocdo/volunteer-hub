@@ -15,6 +15,7 @@ from src.routers.posts_route import posts_router
 from src.routers.comments_route import comments_router
 from src.routers.reacts_route import reacts_router
 from src.routers.notifications_route import notifications_router
+from src.routers.admin_route import admin_router
 
 SRC_DIR = Path(__file__).resolve().parent
 
@@ -43,6 +44,7 @@ app.include_router(posts_router, prefix="/api/posts", tags=["Post"])
 app.include_router(comments_router, prefix="/api/comments", tags=["Comment"])
 app.include_router(reacts_router, prefix="/api/reacts", tags=["React"])
 app.include_router(notifications_router, prefix="/api/notifications", tags=["Notification"])
+app.include_router(admin_router, prefix="/api/admin", tags=["Admin"])
 
 def start():
     uvicorn.run(
