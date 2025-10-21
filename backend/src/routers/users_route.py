@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from src.services.users_service import UserService
 from src.schemas.user_schemas import UserUpdate, HistoryItem
 from typing import Optional, List
+import traceback
 
 from src.config.db_config import get_db
 from src.config.redis_config import redis_client as r
@@ -65,7 +66,7 @@ async def get_my_participation_history(
 
     role = user["role"]
     if role != "volunteer":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view history")
+        raise HTTPException(status_code=403, detail="Not authorized to view history")
     
     user_id = user["user_id"]
 
@@ -85,26 +86,26 @@ async def get_my_participation_history(
     """
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
+        raise HTTPException(status_code=401, detail="Unauthorized")
     
     token = auth_header.split(" ")[1]
 
     # Lấy session từ Redis để xác thực và lấy thông tin
     session_json = await r.get(token)
     if not session_json:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired or invalid")
+        raise HTTPException(status_code=401, detail="Session expired or invalid")
     
     try:
         # Kiểm tra vai trò người dùng trong session
         if session_json.get('role') != 'volunteer':
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, 
+                status_code=403, 
                 detail="Not authorized to view history. Volunteer role required."
             )
         
         user_id = session_json.get('user_id')
         if not user_id:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User ID not found in session")
+            raise HTTPException(status_code=400, detail="User ID not found in session")
 
         # Gọi service để lấy dữ liệu lịch sử
         history_items = await UserService.get_user_history(db=db, user_id=user_id)
@@ -114,4 +115,4 @@ async def get_my_participation_history(
         raise e
     except Exception:
         traceback.print_exc()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not fetch user history")
+        raise HTTPException(status_code=500, detail="Could not fetch user history")
