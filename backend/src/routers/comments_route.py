@@ -24,6 +24,8 @@ async def create_comment(request: Request, post_id: int, body: CommentCreate, db
     session_json = await r.get(token)
     if not session_json:
         raise HTTPException(status_code=401, detail="Session expired or invalid")
+    if session_json['role'] == "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin not authorized")
 
     try:
         user = json.loads(session_json)

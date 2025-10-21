@@ -33,7 +33,9 @@ async def create_post(request: Request, event_id: int, post: PostCreate, db: Ses
     #Lấy thông tin user trong Redis
     session_json = await r.get(token)
     if not session_json:
-        raise HTTPException(status_code=401, detail="Session expired or invalid")
+        raise HTTPException(status_code=401, detail="Session expired or invalid")   
+    if session_json['role'] == "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin not authorized")
     
     try:
         user = json.loads(session_json)
@@ -65,7 +67,9 @@ async def delete_post(request: Request, post_id: int, db: Session = Depends(get_
     # --- Lấy thông tin user trong Redis ---
     session_json = await r.get(token)
     if not session_json:
-        raise HTTPException(status_code=401, detail="Session expired or invalid")
+        raise HTTPException(status_code=401, detail="Session expired or invalid")  
+    if session_json['role'] == "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin not authorized")
 
     try:
         user = json.loads(session_json)

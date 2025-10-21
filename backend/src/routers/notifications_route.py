@@ -24,6 +24,8 @@ async def get_notifications(request: Request, db: Session = Depends(get_db)):
     session_json = await r.get(token)
     if not session_json:
         raise HTTPException(status_code=401, detail="Session expired or invalid")
+    if session_json['role'] == "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin not authorized")
 
     try:
         user = json.loads(session_json)
@@ -50,6 +52,8 @@ async def mark_notification_read(request: Request, notification_id: int, body: N
     session_json = await r.get(token)
     if not session_json:
         raise HTTPException(status_code=401, detail="Session expired or invalid")
+    if session_json['role'] == "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin not authorized")
 
     try:
         user = json.loads(session_json)
