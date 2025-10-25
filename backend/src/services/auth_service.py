@@ -11,12 +11,6 @@ from src.models.user_model import User
 from src.utils.security import hash_password, verify_password, create_access_token
 from src.utils.gmail_sender import send_email_verification_code
 
-class AuthService:
-    pass
-
-class VerificationCodeService:
-    pass
-
 
 class AuthService:
     @staticmethod

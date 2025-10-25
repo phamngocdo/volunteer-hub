@@ -1,7 +1,6 @@
 import traceback
 from sqlalchemy.orm import Session
-from sqlalchemy import exists
-from sqlalchemy import func
+from sqlalchemy import select, update, func
 from sqlalchemy.future import select
 from datetime import date
 from typing import Optional, List
@@ -26,27 +25,56 @@ class EventService:
             raise
     
     @staticmethod
-    async def get_public_events(db: Session, category: Optional[str], start_date: Optional[date]) -> List[Event]:
-        """
-        Lấy danh sách các sự kiện đã được duyệt (public).
-        """
+    async def get_public_events(
+        db: Session,
+        category: Optional[str] = None,
+        start_date: Optional[date] = None,
+        status: Optional[str] = None
+    ) -> List[dict]:
+
         try:
+            today = date.today()
+
+            db.execute(
+                update(Event)
+                .where(Event.end_date < today)
+                .where(Event.status != "completed")
+                .values(status="completed")
+            )
+            db.commit()
+
             query = select(Event)
 
+            allowed_status = ["approved", "completed"]
+            if status:
+                if status.lower() not in allowed_status:
+                    query = query.where(Event.status.in_(allowed_status))
+                else:
+                    query = query.where(Event.status == status.lower())
+            else:
+                query = query.where(Event.status.in_(allowed_status))
+
             if category:
-                # 1. Chuẩn hóa input từ người dùng
-                cleaned_category = category.lower().strip()
-                
-                # 2. So sánh input đã chuẩn hóa với cột category đã được chuyển về chữ thường trong DB
-                query = query.where(func.lower(Event.category) == cleaned_category)
-            
+                query = query.where(Event.category == category.strip())
+
             if start_date:
-                query = query.where(Event.start_date >= start_date)
+                query = query.where(Event.start_date == start_date)
 
             query = query.order_by(Event.start_date.asc())
+
             result = db.execute(query)
-            return result.scalars().all()
-        except Exception as e:
+            events = result.scalars().all()
+
+            events_with_hot = []
+            for e in events:
+                e_dict = e.__dict__.copy() 
+                reg_count = len(e.registrations) if e.registrations else 0
+                e_dict["hot"] = (e.status == "approved" and reg_count > 0)
+                events_with_hot.append(e_dict)
+
+            return events_with_hot
+
+        except Exception as exc:
             traceback.print_exc()
             raise
     
@@ -111,6 +139,36 @@ class EventService:
             raise
 
 class RegistrationService:
+    @staticmethod
+    async def get_registration_status(db: Session, event_id: int, volunteer_id: int) -> str:
+        """
+        Trả về trạng thái đăng ký sự kiện của tình nguyện viên.
+        Nếu sự kiện đã qua end_date -> trả về completed.
+        """
+        try:
+            registration = (
+                db.query(EventRegistration)
+                .join(Event, Event.event_id == EventRegistration.event_id)
+                .filter(
+                    EventRegistration.event_id == event_id,
+                    EventRegistration.user_id == volunteer_id
+                )
+                .first()
+            )
+
+            if not registration:
+                return "not_registered"
+
+            if registration.event.end_date and registration.event.end_date < date.today():
+                await RegistrationService.update_status(db, registration.registration_id, "completed")
+                return "completed"
+
+            return registration.status
+
+        except Exception:
+            traceback.print_exc()
+            raise
+
     @staticmethod
     async def get_registration_by_id(db: Session, registration_id: int) -> Optional[EventRegistration]:
         """
