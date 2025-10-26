@@ -22,9 +22,25 @@ export function initHomePage() {
 
   async function fetchEvents() {
     try {
+      const cached = sessionStorage.getItem("events_data");
+      const cacheTime = sessionStorage.getItem("events_cache_time");
+      const now = Date.now();
+
+      if (cached && cacheTime && now - parseInt(cacheTime) < 60000) {
+        allEvents = JSON.parse(cached);
+        renderEvents(allEvents);
+        checkURLForModal();
+        return;
+      }
+
       const res = await fetch("http://localhost:8000/api/events/");
       allEvents = await res.json();
+
+      sessionStorage.setItem("events_data", JSON.stringify(allEvents));
+      sessionStorage.setItem("events_cache_time", now.toString());
+
       renderEvents(allEvents);
+      checkURLForModal();
     } catch (err) {
       console.error("Lỗi tải sự kiện:", err);
     }
@@ -45,19 +61,22 @@ export function initHomePage() {
     events.forEach(ev => {
       const start = formatDate(ev.start_date);
       const end = formatDate(ev.end_date);
+      const volunteer_number = ev.volunteer_number;
+      const hot = ev.volunteer_number > 1;
 
       const card = document.createElement("div");
       card.className = "event-card";
       card.innerHTML = `
-        ${ev.hot ? '<span class="event-hot">HOT</span>' : ""}
+        ${hot ? '<span class="event-hot">HOT</span>' : ""}
         <img src="${ev.image_url}" class="event-image" alt="${ev.title}" />
         <div class="event-content">
           <h3 class="event-title">${ev.title}</h3>
           <p class="event-meta"><i class="fa-solid fa-location-dot"></i> <strong>Địa điểm:</strong> ${ev.location}</p>
-          <p class="event-meta"><strong>Ngày bắt đầu:</strong> ${start}</p>
-          <p class="event-meta"><strong>Ngày kết thúc:</strong> ${end}</p>
+          <p class="event-meta"><i class="fa-solid fa-person"></i> <strong>Số người tham gia:</strong> ${volunteer_number}</p>
+          <p class="event-meta"><i class="fa-solid fa-calendar-days"></i> <strong>Thời gian:</strong> ${start} - ${end}</p>
         </div>
       `;
+
       card.addEventListener("click", () => openModal(ev));
       container.appendChild(card);
     });
@@ -66,13 +85,28 @@ export function initHomePage() {
   function openModal(ev) {
     currentEvent = ev;
     modalImage.src = ev.image_url;
+
     modalTitle.textContent = ev.title;
-    modalLocation.textContent = `📍 ${ev.location}`;
-    modalDate.textContent = `📅 ${formatDate(ev.start_date)} - ${formatDate(ev.end_date)}`;
-    modalDescription.textContent = ev.description || "Không có mô tả.";
+
+    modalDescription.innerHTML = `
+    <p class="event-meta"><i class="fa-solid fa-location-dot"></i> <strong>Địa điểm:</strong> ${ev.location}</p>
+    <p class="event-meta"><i class="fa-solid fa-person"></i> <strong>Số người tham gia:</strong> ${ev.volunteer_number}</p>
+    <p class="event-meta"><i class="fa-solid fa-calendar-days"></i> <strong>Thời gian:</strong> ${formatDate(ev.start_date)} - ${formatDate(ev.end_date)}</p>
+    </br>
+    <div class="event-desc-text">${ev.description || "Không có mô tả."}</div>
+  `;
+
     joinError.textContent = "";
     modal.classList.remove("hidden");
     updateJoinButton(ev.event_id);
+
+    history.pushState({ modal: true, eventId: ev.event_id }, "", `/events/${ev.event_id}`);
+  }
+
+  function closeModal(push = true) {
+    modal.classList.add("hidden");
+    currentEvent = null;
+    if (push) history.pushState({ modal: false }, "", "/home");
   }
 
   async function fetchRegistrationStatus(eventId) {
@@ -81,14 +115,12 @@ export function initHomePage() {
     if (!token || !token_type) return "not_registered";
 
     try {
-      const res = await fetch(`http://localhost:8000/api/events/${eventId}/status/`, {
-        headers: {
-          "Authorization": `${token_type} ${token}`
-        }
+      const res = await fetch(`http://localhost:8000/api/events/${eventId}/registration-status/`, {
+        headers: { "Authorization": `${token_type} ${token}` }
       });
       if (!res.ok) return "not_registered";
       const data = await res.json();
-      return data.status;
+      return data.registration_status;
     } catch {
       return "not_registered";
     }
@@ -99,25 +131,33 @@ export function initHomePage() {
     joinBtn.disabled = false;
     joinBtn.classList.remove("disabled");
 
+    joinBtn.innerHTML = "";
+
     switch (status) {
       case "approved":
-        joinBtn.textContent = "❌ Hủy đăng ký";
+        joinBtn.innerHTML = `<i class="fa-solid fa-xmark"></i> Hủy đăng ký`;
         joinBtn.onclick = async () => await cancelEvent(eventId);
         break;
+
       case "completed":
-        joinBtn.textContent = "✅ Đã hoàn thành";
+      case "event_ended":
+        joinBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Sự kiện đã kết thúc`;
         joinBtn.disabled = true;
         break;
+
+
       case "pending":
-        joinBtn.textContent = "⏳ Đang chờ duyệt";
+        joinBtn.innerHTML = `<i class="fa-solid fa-hourglass-half"></i> Đang chờ duyệt`;
         joinBtn.disabled = true;
         break;
+
       case "rejected":
-        joinBtn.textContent = "🔁 Đăng ký lại";
+        joinBtn.innerHTML = `<i class="fa-solid fa-rotate-right"></i> Đăng ký lại`;
         joinBtn.onclick = async () => await joinEvent();
         break;
+
       default:
-        joinBtn.textContent = "➕ Tham gia sự kiện";
+        joinBtn.innerHTML = `<i class="fa-solid fa-plus"></i> Tham gia sự kiện`;
         joinBtn.onclick = async () => await joinEvent();
         break;
     }
@@ -125,13 +165,15 @@ export function initHomePage() {
 
   async function joinEvent() {
     if (!currentEvent) return;
+
     const token = localStorage.getItem("access_token");
     const token_type = localStorage.getItem("token_type");
+    const joinError = document.getElementById("joinError");
+    joinError.textContent = "";
     if (!token || !token_type) {
       window.location.href = "/login";
       return;
     }
-    joinError.textContent = "";
 
     try {
       const res = await fetch(`http://localhost:8000/api/events/${currentEvent.event_id}/register/`, {
@@ -147,18 +189,25 @@ export function initHomePage() {
         joinError.style.color = "red";
         return;
       }
+
       if (!res.ok) throw new Error("Lỗi đăng ký");
 
-      alert("✅ Tham gia sự kiện thành công!");
-      modal.classList.add("hidden");
+      joinError.textContent = "Tham gia sự kiện thành công!";
+      joinError.style.color = "green";
+
+      setTimeout(closeModal, 1000);
     } catch {
-      joinError.textContent = "❌ Không thể tham gia. Vui lòng thử lại.";
+      joinError.textContent = "Không thể tham gia. Vui lòng thử lại.";
+      joinError.style.color = "red";
     }
   }
+
 
   async function cancelEvent(eventId) {
     const token = localStorage.getItem("access_token");
     const token_type = localStorage.getItem("token_type");
+    const joinError = document.getElementById("joinError");
+    joinError.textContent = "";
     if (!token || !token_type) {
       window.location.href = "/login";
       return;
@@ -166,21 +215,17 @@ export function initHomePage() {
 
     try {
       const res = await fetch(`http://localhost:8000/api/events/${eventId}/cancel-registration`, {
-        method: "POST",
-        headers: {
-          "Authorization": `${token_type} ${token}`
-        }
+        method: "DELETE",
+        headers: { "Authorization": `${token_type} ${token}` }
       });
       if (!res.ok) throw new Error("Hủy thất bại");
-      alert("❌ Bạn đã hủy đăng ký sự kiện này.");
-      modal.classList.add("hidden");
+      joinError.textContent = "Hủy tham gia sự kiện thành công!";
+      joinError.style.color = "green";
+      setTimeout(closeModal, 1000);
+
     } catch {
       joinError.textContent = "Không thể hủy. Vui lòng thử lại.";
     }
-  }
-
-  function closeModal() {
-    modal.classList.add("hidden");
   }
 
   function applyFilters() {
@@ -205,7 +250,7 @@ export function initHomePage() {
     el.addEventListener("input", applyFilters)
   );
 
-  closeBtn.addEventListener("click", closeModal);
+  closeBtn.addEventListener("click", () => closeModal());
   modal.addEventListener("click", e => {
     if (e.target === modal) closeModal();
   });

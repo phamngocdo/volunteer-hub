@@ -45,6 +45,7 @@ body {
   font-size: 0.95rem;
   background: var(--bg);
   color: var(--text);
+  text-align: left;
 }
 
 @media (max-width: 1024px) {
@@ -65,14 +66,22 @@ body {
 
 @media (max-width: 600px) {
   .filters {
-    flex-direction: column;
-    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
-  .filters input,
-  .filters select {
+  .filters input[type="text"],
+  .filters select,
+  .filters input[type="date"],
+  .filters button {
     flex: 1 1 100%;
-    width: 100%;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.5rem;
+    min-width: 0;
+  }
+
+  .filters label {
+    font-size: 0.85rem;
   }
 }
 
@@ -148,62 +157,110 @@ body {
   display: none;
 }
 
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.25s ease;
+}
+
 .modal-content {
   background: var(--bg);
   color: var(--text);
-  width: 90%;
-  max-width: 600px;
-  max-height: 80vh;
-  border-radius: 10px;
-  overflow-y: auto;
-  padding: 1.5rem;
+  width: 92%;
+  max-width: 800px;
+  max-height: 85vh;
+  border-radius: 16px;
+  padding: 1.8rem;
   position: relative;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  transform: translateY(-15px);
+  animation: slideUp 0.35s ease forwards;
+  transition: all 0.3s ease;
 }
 
 .modal-image {
   width: 100%;
-  border-radius: 6px;
-  margin-bottom: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.2rem;
   object-fit: cover;
-  aspect-ratio: 1 / 1.618;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
 }
 
 .modal-close {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: transparent;
+  top: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.15);
   border: none;
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   cursor: pointer;
   color: var(--text);
+  padding: 0.3rem 0.6rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
 }
 
 .modal-footer {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1rem;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.2rem;
 }
 
 .join-btn {
-  background: var(--accent);
-  color: white;
-  padding: 0.6rem 1.2rem;
+  background: linear-gradient(135deg, #007bff, #00b4d8);
+  color: #fff;
+  padding: 0.7rem 1.4rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  transition: background 0.2s;
+  font-size: 1rem;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 10px rgba(0, 123, 255, 0.4);
 }
 
 .join-btn:hover {
-  background: #005fa3;
+  background: linear-gradient(135deg, #005fa3, #0096c7);
+  transform: translateY(-2px);
 }
 
 .join-error {
-  color: red;
+  color: #ff4d4d;
   font-size: 0.9rem;
+  text-align: right;
+  display: block;
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
