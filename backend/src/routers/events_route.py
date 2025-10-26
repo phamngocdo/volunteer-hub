@@ -142,7 +142,7 @@ async def delete_event(
 
 # --- VOLUNTEER ENDPOINTS ---
 
-@events_router.post("/{event_id}/register", response_model=RegistrationDetail, status_code=status.HTTP_201_CREATED)
+@events_router.post("/{event_id}/register", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def register_for_event(
     request: Request,
     event_id: int,
@@ -168,7 +168,7 @@ async def register_for_event(
     if not registration:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Could not register for this event. You may have already registered.")
 
-    return registration
+    return {"detail": "Register successfully"}
 
 @events_router.get("/{event_id}/registration-status", response_model=dict)
 async def check_registration_status(

@@ -65,14 +65,13 @@ class EventService:
             result = db.execute(query)
             events = result.scalars().all()
 
-            events_with_hot = []
+            events_with_volunteer_number = []
             for e in events:
                 e_dict = e.__dict__.copy() 
-                reg_count = len(e.registrations) if e.registrations else 0
-                e_dict["hot"] = (e.status == "approved" and reg_count > 0)
-                events_with_hot.append(e_dict)
+                e_dict["volunteer_number"] = len(e.registrations)
+                events_with_volunteer_number.append(e_dict)
 
-            return events_with_hot
+            return events_with_volunteer_number
 
         except Exception as exc:
             traceback.print_exc()
@@ -143,9 +142,16 @@ class RegistrationService:
     async def get_registration_status(db: Session, event_id: int, volunteer_id: int) -> str:
         """
         Trả về trạng thái đăng ký sự kiện của tình nguyện viên.
-        Nếu sự kiện đã qua end_date -> trả về completed.
         """
         try:
+            event = db.query(Event).filter(Event.event_id == event_id).first()
+
+            if not event:
+                return "event_ended" 
+
+            if event.status == "completed":
+                return "event_ended"
+
             registration = (
                 db.query(EventRegistration)
                 .join(Event, Event.event_id == EventRegistration.event_id)
@@ -159,13 +165,10 @@ class RegistrationService:
             if not registration:
                 return "not_registered"
 
-            if registration.event.end_date and registration.event.end_date < date.today():
-                await RegistrationService.update_status(db, registration.registration_id, "completed")
-                return "completed"
-
             return registration.status
 
-        except Exception:
+        except Exception as e:
+            print(f"Lỗi trong quá trình lấy trạng thái đăng ký: {e}")
             traceback.print_exc()
             raise
 
