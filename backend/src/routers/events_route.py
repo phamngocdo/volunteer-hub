@@ -283,7 +283,7 @@ async def update_registration_status(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
 
     current_user_id = session_data["user_id"]
-    event = await EventService.get_event_by_id(db, event_id=registration.event_id)
+    event = await EventService.get_event_by_id(db, event_id=registration_id)
     if not event or event.manager_id != current_user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to manage this registration")
     
