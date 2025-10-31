@@ -1,0 +1,52 @@
+<link rel="stylesheet" href="../css/event-wall.css" />
+
+<div class="event-wall-container">
+  <!-- Tabs -->
+  <div class="event-tabs">
+    <button class="tab-btn active" data-tab="all">Tất cả sự kiện</button>
+    <button class="tab-btn" data-tab="joined">Đã tham gia</button>
+    <button class="tab-btn" data-tab="upcoming">Sắp diễn ra</button>
+  </div>
+
+  <!-- Nội dung tab -->
+  <div class="event-tab-content" id="all">
+    <!-- Các bài post sẽ được load động vào đây -->
+  </div>
+
+  <div class="event-tab-content hidden" id="joined">
+    <p>Bạn chưa tham gia sự kiện nào.</p>
+  </div>
+
+  <div class="event-tab-content hidden" id="upcoming">
+    <p>Không có sự kiện sắp diễn ra.</p>
+  </div>
+</div>
+
+<!-- Modal bình luận (ẩn) -->
+<div id="commentModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn">&times;</span>
+
+    <div id="modal-post-content">
+      <!-- Nội dung bài post sẽ được JS thêm vào -->
+    </div>
+
+    <!-- Phần bình luận -->
+    <div class="comments-section">
+      <div class="comment-item">
+        <img src="../assets/default-avatar.png" class="avatar-sm" alt="user" />
+        <div class="comment-content">
+          <p><strong>Trần Đức</strong> Tuyệt vời quá! ❤️</p>
+        </div>
+      </div>
+
+      <div class="comment-form">
+        <input type="text" placeholder="Viết bình luận..." id="commentInput" />
+        <button id="sendCommentBtn">Gửi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="../js/event-wall.js"></script>
