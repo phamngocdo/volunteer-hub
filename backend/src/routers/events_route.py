@@ -1,4 +1,5 @@
 import os
+import json
 from dotenv import load_dotenv
 
 from pathlib import Path
@@ -30,12 +31,13 @@ events_router = APIRouter()
 async def get_all_events(
     category: Optional[str] = None,
     start_date: Optional[date] = None,
+    status: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
     """
     Lấy danh sách tất cả sự kiện đã được duyệt (approved).
     """
-    events = await EventService.get_public_events(db, category=category, start_date=start_date)
+    events = await EventService.get_public_events(db, category=category, start_date=start_date, status=status)
     return events
 
 
@@ -140,7 +142,7 @@ async def delete_event(
 
 # --- VOLUNTEER ENDPOINTS ---
 
-@events_router.post("/{event_id}/register", response_model=RegistrationDetail, status_code=status.HTTP_201_CREATED)
+@events_router.post("/{event_id}/register", response_model=dict, status_code=status.HTTP_201_CREATED)
 async def register_for_event(
     request: Request,
     event_id: int,
@@ -153,18 +155,50 @@ async def register_for_event(
     token = auth_header.split(" ")[1]
 
     session_json = await r.get(token)
+    
     if not session_json:
         raise HTTPException(status_code=401, detail="Session expired or invalid")
 
-    if session_json["role"] != "volunteer":
+    session_data = json.loads(session_json)
+    if session_data["role"] != "volunteer":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
 
-    user_id = session_json["user_id"]
+    user_id = session_data["user_id"]
     registration = await RegistrationService.create_registration(db, event_id=event_id, user_id=user_id)
     if not registration:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Could not register for this event. You may have already registered.")
 
-    return registration
+    return {"detail": "Register successfully"}
+
+@events_router.get("/{event_id}/registration-status", response_model=dict)
+async def check_registration_status(
+    request: Request,
+    event_id: int,
+    db: Session = Depends(get_db),
+):
+    """
+    Trả về trạng thái đăng ký sự kiện của user hiện tại.
+    """    
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    token = auth_header.split(" ")[1]
+
+    session_json = await r.get(token)
+    
+    if not session_json:
+        raise HTTPException(status_code=401, detail="Session expired or invalid")
+    
+    session_data = json.loads(session_json)
+
+    if session_data["role"] != "volunteer":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to get status of registation")
+
+    user_id = session_data["user_id"]
+    
+    status = await RegistrationService.get_registration_status(db, event_id, user_id)
+    return {"event_id": event_id, "registration_status": status}
+
 
 @events_router.delete("/{event_id}/cancel-registration", status_code=status.HTTP_204_NO_CONTENT)
 async def cancel_event_registration(
@@ -181,11 +215,13 @@ async def cancel_event_registration(
     session_json = await r.get(token)
     if not session_json:
         raise HTTPException(status_code=401, detail="Session expired or invalid")
+    
+    session_data = json.loads(session_json)
 
-    if session_json["role"] != "volunteer":
+    if session_data["role"] != "volunteer":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
 
-    user_id = session_json["user_id"]
+    user_id = session_data["user_id"]
 
     success = await RegistrationService.cancel_registration(db, event_id=event_id, user_id=user_id)
     if not success:
@@ -210,11 +246,13 @@ async def get_event_registrations(
     session_json = await r.get(token)
     if not session_json:
         raise HTTPException(status_code=401, detail="Session expired or invalid")
+    
+    session_data = json.loads(session_json)
 
-    if session_json["role"] != "manager":
+    if session_data["role"] != "manager":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
 
-    current_user_id = session_json["user_id"]
+    current_user_id = session_data["user_id"]
     event = await EventService.get_event_by_id(db, event_id=event_id)
     if not event or event.manager_id != current_user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to view registrations for this event")
@@ -238,12 +276,14 @@ async def update_registration_status(
     session_json = await r.get(token)
     if not session_json:
         raise HTTPException(status_code=401, detail="Session expired or invalid")
+    
+    session_data = json.loads(session_json)
 
-    if session_json["role"] != "manager":
+    if session_data["role"] != "manager":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to create events")
 
-    current_user_id = session_json["user_id"]
-    event = await EventService.get_event_by_id(db, event_id=registration.event_id)
+    current_user_id = session_data["user_id"]
+    event = await EventService.get_event_by_id(db, event_id=registration_id)
     if not event or event.manager_id != current_user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to manage this registration")
     

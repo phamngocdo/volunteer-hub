@@ -1,0 +1,266 @@
+:root {
+  --bg: #ffffff;
+  --text: #222;
+  --accent: #0077cc;
+  --border: #ddd;
+  --hot: #e53935;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", sans-serif;
+}
+
+.dashboard-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: var(--accent);
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.filters input[type="text"] {
+  flex: 1;
+  min-width: 220px;
+}
+
+.filters select,
+.filters input[type="date"] {
+  flex: 0 0 180px;
+}
+
+.filters input,
+.filters select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: var(--bg);
+  color: var(--text);
+  text-align: left;
+}
+
+@media (max-width: 1024px) {
+  .filters {
+    flex-wrap: wrap;
+  }
+
+  .filters input[type="text"] {
+    flex: 1 1 100%;
+    order: -1;
+  }
+
+  .filters select,
+  .filters input[type="date"] {
+    flex: 1 1 calc(33.333% - 0.75rem);
+  }
+}
+
+@media (max-width: 600px) {
+  .filters {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .filters input[type="text"],
+  .filters select,
+  .filters input[type="date"],
+  .filters button {
+    flex: 1 1 100%;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.5rem;
+    min-width: 0;
+  }
+
+  .filters label {
+    font-size: 0.85rem;
+  }
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.event-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.event-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.event-content {
+  padding: 1rem;
+}
+
+.event-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.event-meta {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.event-hot {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--hot);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.hidden {
+  display: none;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.25s ease;
+}
+
+.modal-content {
+  background: var(--bg);
+  color: var(--text);
+  width: 92%;
+  max-width: 800px;
+  max-height: 85vh;
+  border-radius: 16px;
+  padding: 1.8rem;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  transform: translateY(-15px);
+  animation: slideUp 0.35s ease forwards;
+  transition: all 0.3s ease;
+}
+
+.modal-image {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 1.2rem;
+  object-fit: cover;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text);
+  padding: 0.3rem 0.6rem;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.modal-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.2rem;
+}
+
+.join-btn {
+  background: linear-gradient(135deg, #007bff, #00b4d8);
+  color: #fff;
+  padding: 0.7rem 1.4rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 10px rgba(0, 123, 255, 0.4);
+}
+
+.join-btn:hover {
+  background: linear-gradient(135deg, #005fa3, #0096c7);
+  transform: translateY(-2px);
+}
+
+.join-error {
+  color: #ff4d4d;
+  font-size: 0.9rem;
+  text-align: right;
+  display: block;
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

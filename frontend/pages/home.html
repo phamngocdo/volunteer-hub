@@ -1,14 +1,41 @@
-<section class="hero">
-  <h1>Chào mừng đến với Volunteer Hub</h1>
-  <p>Hãy cùng tham gia các hoạt động tình nguyện và kết nối cộng đồng!</p>
-  <a href="/register" class="btn btn-primary">Tham gia ngay</a>
-</section>
+<link rel="stylesheet" href="../css/home.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<section class="features">
-  <h2>Tính năng nổi bật</h2>
-  <ul>
-    <li>Kết nối các dự án tình nguyện</li>
-    <li>Tìm kiếm cơ hội phù hợp</li>
-    <li>Quản lý lịch sử tham gia</li>
-  </ul>
-</section>
+<div class="home-container">
+  <div class="filters">
+    <input type="text" id="searchInput" placeholder="Tìm kiếm sự kiện tại đây" />
+    <input type="date" id="dateFilter" />
+
+    <select id="statusFilter">
+      <option value="">Tất cả trạng thái</option>
+      <option value="approved">Đã duyệt</option>
+      <option value="completed">Đã hoàn thành</option>
+    </select>
+
+    <select id="categoryFilter">
+      <option value="">Tất cả thể loại</option>
+      <option value="Môi trường">Môi trường</option>
+      <option value="Từ thiện">Từ thiện</option>
+      <option value="Giáo dục">Giáo dục</option>
+    </select>
+
+  </div>
+
+  <div id="eventsContainer" class="events-grid"></div>
+</div>
+
+<div id="eventModal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <button class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+    </br>
+    <div class="modal-body">
+      <h1 id="modalTitle"></h1>
+      <img id="modalImage" class="modal-image" />
+      <p id="modalDescription"></p>
+    </div>
+    <div class="modal-footer">
+      <button id="joinEventBtn" class="join-btn">Tham gia sự kiện</button><br>
+      <p id="joinError" class="join-error"></p>
+    </div>
+  </div>
+</div>

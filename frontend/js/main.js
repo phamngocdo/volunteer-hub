@@ -108,7 +108,7 @@ export async function initHeader() {
   function renderUserActions(role, user) {
     const avatarUrl = "../assets/default-avatar.png";
     const html = `
-      <button class="notification-btn" aria-label="Thông báo">🔔<span class="notification-count">3</span></button>
+      <button class="notification-btn" aria-label="Thông báo"><i class="fa-solid fa-bell"></i><span class="notification-count">3</span></button>
       <div class="user-avatar user-menu-toggle"><img src="${avatarUrl}" alt="Avatar"></div>
       <div class="user-dropdown">
         ${role === "volunteer" ? '<a href="/history">Lịch sử tham gia</a>' : ''}
@@ -154,11 +154,15 @@ export async function navigateTo(page) {
   main.innerHTML = html;
   window.history.pushState({}, "", `/${page}`);
 
+  document.querySelectorAll(`script[data-page]`).forEach(s => s.remove());
+
   const script = document.createElement("script");
-  script.src = `./js/${page}.js`;
+  script.src = `./js/${page}.js?cacheBust=${Date.now()}`;
   script.type = "module";
+  script.dataset.page = page;
   document.body.appendChild(script);
 }
+
 
 document.body.addEventListener("click", (e) => {
   const link = e.target.closest("a");

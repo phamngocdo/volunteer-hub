@@ -23,6 +23,7 @@ class EventSimple(EventBase):
     event_id: int
     status: str
     manager_id: int
+    volunteer_number: Optional[int]
 
     class Config:
         from_attributes = True
