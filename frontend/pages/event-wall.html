@@ -1,0 +1,55 @@
+<link rel="stylesheet" href="../css/event-wall.css" />
+
+<div class="event-wall-container">
+  <!-- Tabs -->
+  <div class="event-tabs">
+    <button class="tab-btn active" data-tab="all">Tất cả sự kiện</button>
+    <button class="tab-btn" data-tab="joined">Đã tham gia</button>
+    <button class="tab-btn" data-tab="upcoming">Sắp diễn ra</button>
+  </div>
+
+  <!-- Nội dung tab -->
+  <div class="event-tab-content" id="all">
+    <!-- Các bài post sẽ được load động vào đây -->
+  </div>
+
+  <div class="event-tab-content hidden" id="joined">
+    <p>Bạn chưa tham gia sự kiện nào.</p>
+  </div>
+
+  <div class="event-tab-content hidden" id="upcoming">
+    <p>Không có sự kiện sắp diễn ra.</p>
+  </div>
+</div>
+
+<!-- Overlay bài viết chi tiết -->
+<div id="postOverlay" class="post-overlay hidden">
+  <div class="post-overlay-content">
+    <button id="closeOverlayBtn" class="close-overlay">&times;</button>
+
+    <!-- Bài viết -->
+    <div id="overlayPostContent" class="overlay-post-content">
+      <!-- Nội dung bài post sẽ được JS thêm vào -->
+    </div>
+
+    <!-- Bình luận -->
+    <div class="overlay-comments">
+      <div class="comment-list" id="commentList">
+        <div class="comment-item">
+          <img src="../assets/default-avatar.png" class="avatar-sm" alt="user" />
+          <div class="comment-content">
+            <p><strong>Trần Đức</strong> Tuyệt vời quá! ❤️</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="comment-form">
+        <input type="text" placeholder="Viết bình luận..." id="overlayCommentInput" />
+        <button id="overlaySendBtn">Gửi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="../js/event-wall.js"></script>

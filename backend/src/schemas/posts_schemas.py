@@ -16,3 +16,21 @@ class PostDetail(PostCreate):
     class Config:
         from_attributes = True # giúp Pydantic chuyển đổi trực tiếp từ ORM object(SQLAlchemy) sang model mà không cần dict
 
+
+
+class PostAllDetail(BaseModel):
+    post_id: int
+    content: str
+    images_url: Optional[str] = None
+    event_id: int
+    user_id: int
+    created_at: datetime
+    first_name: str
+    last_name: str
+    react_count: int
+    comment_count: int
+    user_react: Optional[str] = None  # Có thể là "like", "love", v.v.
+
+    class Config:
+        orm_mode = True
+

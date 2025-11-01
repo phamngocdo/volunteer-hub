@@ -1,0 +1,386 @@
+.event-wall-container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+/* Tabs */
+.event-tabs {
+  display: flex;
+  justify-content: space-around;
+  background: white;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.event-tab-content {
+  min-height: 200px;
+  /* giữ không gian để tránh layout nhảy */
+}
+
+
+.tab-btn {
+  flex: 1;
+  border: none;
+  background: none;
+  font-weight: 600;
+  color: #555;
+  padding: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tab-btn:hover {
+  background: #f3f4f6;
+}
+
+.tab-btn.active {
+  border-bottom: 3px solid #3c3c3c;
+  color: #373838;
+}
+
+/* Event post */
+.event-post {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  padding: 16px;
+}
+
+.event-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.post-info h4 {
+  margin: 0;
+  color: #1d1d1d;
+  font-size: 15px;
+}
+
+.post-info p {
+  margin: 0;
+  font-size: 13px;
+  color: #888;
+}
+
+.event-body {
+  margin-top: 10px;
+}
+
+.event-content {
+  font-size: 15px;
+  color: #242526;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.event-img {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* Actions */
+.event-actions {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  gap: 15px;
+  margin-top: 12px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.event-actions button {
+  background: none;
+  border: none;
+  font-weight: 600;
+  color: #65676b;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.reaction-container {
+  position: relative;
+  display: inline-block;
+}
+
+.reaction-popup {
+  position: absolute;
+  bottom: 45px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+  display: flex;
+  gap: 8px;
+  background: white;
+  padding: 6px 10px;
+  border-radius: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 10;
+}
+
+.reaction-popup.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) scale(1);
+}
+
+
+.like-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: #f0f2f5;
+  padding: 6px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.like-btn:hover {
+  background: #e4e6eb;
+}
+
+.like-icon {
+  width: 22px;
+  height: 22px;
+  transition: transform 0.15s;
+}
+
+.reaction-popup img {
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.reaction-popup img:hover {
+  transform: scale(1.3);
+}
+
+.reaction-container:hover .reaction-popup {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(-5px);
+}
+
+.react,
+.comment {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.react-count,
+.comment-count {
+  font-size: 14px;
+  color: #65676b;
+}
+
+/* Comments */
+.comment-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.comment-btn:hover {
+  background-color: #f0f2f5;
+}
+
+.comment-icon {
+  width: 22px;
+  height: 22px;
+}
+
+
+/* Overlay toàn màn hình */
+.post-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Khung nội dung chính */
+.post-overlay-content {
+  background-color: #fff;
+  width: 55%;
+  max-width: 700px;
+  height: auto;
+  max-height: 92vh;
+  /* vẫn giới hạn để không tràn màn hình */
+  overflow-y: auto;
+  padding: 15px 20px;
+  /* giảm padding trong */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* căn giữa nội dung */
+}
+
+/* Nút đóng */
+.close-overlay {
+  position: sticky;
+  /* giữ cố định khi cuộn trong overlay */
+  top: 10px;
+  right: 10px;
+  align-self: flex-end;
+  /* đẩy sang phải nếu dùng flex container */
+  background: rgba(245, 243, 243, 0.9);
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+  z-index: 1100;
+  transition: background-color 0.2s ease;
+  margin-bottom: 10px;
+  /* tạo khoảng cách với nội dung */
+}
+
+.close-overlay:hover {
+  background-color: #ececec;
+}
+
+
+/* Nội dung bài viết */
+.overlay-post-content {
+  width: 95%;
+  /* sát lề trong */
+  max-width: 600px;
+  /* cố định chiều rộng nội dung */
+  font-size: 0.9rem;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  transform: none;
+  /* bỏ scale */
+  margin: 0 auto;
+}
+
+/* Ảnh trong bài viết */
+.overlay-post-content .event-img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+/* KHU VỰC BÌNH LUẬN */
+.overlay-comments {
+  width: 95%;
+  max-width: 600px;
+  margin: 0 auto;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.comment-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.comment-item img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.comment-content {
+  background-color: #f0f2f5;
+  border-radius: 16px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  max-width: 85%;
+}
+
+/* Form bình luận */
+.comment-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #ddd;
+}
+
+.comment-form input {
+  flex: 1;
+  border-radius: 18px;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
+.comment-form input:focus {
+  outline: none;
+  border-color: #424243;
+}
+
+.comment-form button {
+  background-color: #454646;
+  color: white;
+  border: none;
+  border-radius: 18px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.comment-form button:hover {
+  background-color: #181819;
+}
+
+/* Ẩn overlay mặc định */
+.hidden {
+  display: none;
+}

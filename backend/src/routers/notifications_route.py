@@ -6,6 +6,7 @@ from typing import List, Optional
 import json
 from src.config.db_config import get_db
 from src.services.notifications_service import NotificationService
+from src.services.users_service import UserService
 from src.schemas.notifications_schemas import *
 from src.config.redis_config import redis_client as r
 
@@ -26,7 +27,10 @@ async def get_notifications(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Session expired or invalid")
 
     try:
-        user = json.loads(session_json)
+        # Kiểm tra JWT, signature và expiry giống /users/me
+        user = await UserService.get_current_user(token=token, db=db)
+        if user.get("role") == "admin":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin not authorized")
         if user.get("status") == "banned":
             raise HTTPException(status_code=403, detail="Your account has been banned")
         user_id = user.get("user_id")
@@ -52,7 +56,10 @@ async def mark_notification_read(request: Request, notification_id: int, body: N
         raise HTTPException(status_code=401, detail="Session expired or invalid")
 
     try:
-        user = json.loads(session_json)
+        # Kiểm tra JWT, signature và expiry giống /users/me
+        user = await UserService.get_current_user(token=token, db=db)
+        if user.get("role") == "admin":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin not authorized")
         if user.get("status") == "banned":
             raise HTTPException(status_code=403, detail="Your account has been banned")
         user_id = user.get("user_id")
