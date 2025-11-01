@@ -1,0 +1,388 @@
+:root {
+  /* Màu nền và màu chữ chung */
+  --bg: #ffffff;
+  --text: #222;
+  --accent: #0077cc;
+  --border: #ddd;
+  --white: #ffffff;
+  --hot: #e53935;
+
+  /* Sidebar */
+  --sidebar-bg: #f8f9fa;
+  --sidebar-text: #333;
+  --sidebar-hover: #e6e9ec;
+
+  /* Trạng thái */
+  --success: #28a745;
+  --danger: #dc3545;
+  --warning: #ffc107;
+  --pending: #6c757d;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Bố cục chính */
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-sidebar {
+  width: 260px;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  padding: 1.5rem 1rem;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1rem;
+  text-align: center;
+  color: var(--accent);
+}
+
+.sidebar-title i {
+  margin-right: 0.5rem;
+  color: var(--accent);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.nav-link {
+  color: var(--sidebar-text);
+  text-decoration: none;
+  padding: 0.8rem 1.2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-link i {
+  margin-right: 0.75rem;
+  width: 20px;
+  text-align: center;
+}
+
+.nav-link:hover {
+  background: var(--sidebar-hover);
+}
+
+.nav-link.active {
+  background: var(--accent);
+  color: var(--white);
+  font-weight: 500;
+}
+
+.nav-link.nav-back {
+  margin-top: auto;
+  color: var(--warning);
+}
+
+/* Nội dung chính */
+.admin-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+/* Trang nội dung */
+.admin-page {
+  display: none;
+}
+
+.admin-page.active-page {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 1rem;
+}
+
+.page-header h2 {
+  margin: 0;
+  color: var(--accent);
+  font-size: 1.6rem;
+}
+
+.export-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.export-btn,
+.filters select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: var(--white);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.export-btn i {
+  margin-right: 0.25rem;
+}
+
+.export-btn.csv {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+.export-btn.json {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.export-btn:hover {
+  background: #f9f9f9;
+}
+
+/* Bộ lọc */
+.filters {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.filters input,
+.filters select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Bảng dữ liệu */
+.table-container {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow-x: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+}
+
+th,
+td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+thead th {
+  background: #f5f7fa;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+tbody tr:hover {
+  background: #f1f5f9;
+}
+
+/* Trạng thái */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--white);
+  text-transform: capitalize;
+}
+
+.status-approved,
+.status-active {
+  background: var(--success);
+}
+
+.status-pending {
+  background: var(--pending);
+}
+
+.status-rejected,
+.status-banned {
+  background: var(--danger);
+}
+
+.status-completed {
+  background: var(--accent);
+}
+
+/* Nút hành động */
+.action-btn {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-right: 5px;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.action-btn:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.btn-approve {
+  background: var(--success);
+}
+
+.btn-reject {
+  background: var(--danger);
+}
+
+.btn-ban {
+  background: var(--warning);
+}
+
+.btn-activate {
+  background: var(--success);
+}
+
+.btn-delete {
+  background: var(--danger);
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.25s ease;
+}
+
+.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: var(--bg);
+  color: var(--text);
+  width: 90%;
+  max-width: 500px;
+  border-radius: 10px;
+  padding: 1.8rem;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  transform: translateY(-15px);
+  animation: slideUp 0.35s ease forwards;
+}
+
+.modal-title {
+  margin-top: 0;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+  transition: color 0.2s ease;
+}
+
+.modal-close:hover {
+  color: var(--danger);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.modal-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-btn.cancel {
+  background: #eee;
+  color: #333;
+}
+
+.modal-btn.confirm {
+  background: var(--danger);
+  color: white;
+}
+
+/* Hiệu ứng */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
