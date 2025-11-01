@@ -22,27 +22,30 @@
   </div>
 </div>
 
-<!-- Modal bình luận (ẩn) -->
-<div id="commentModal" class="modal">
-  <div class="modal-content">
-    <span class="close-btn">&times;</span>
+<!-- Overlay bài viết chi tiết -->
+<div id="postOverlay" class="post-overlay hidden">
+  <div class="post-overlay-content">
+    <button id="closeOverlayBtn" class="close-overlay">&times;</button>
 
-    <div id="modal-post-content">
+    <!-- Bài viết -->
+    <div id="overlayPostContent" class="overlay-post-content">
       <!-- Nội dung bài post sẽ được JS thêm vào -->
     </div>
 
-    <!-- Phần bình luận -->
-    <div class="comments-section">
-      <div class="comment-item">
-        <img src="../assets/default-avatar.png" class="avatar-sm" alt="user" />
-        <div class="comment-content">
-          <p><strong>Trần Đức</strong> Tuyệt vời quá! ❤️</p>
+    <!-- Bình luận -->
+    <div class="overlay-comments">
+      <div class="comment-list" id="commentList">
+        <div class="comment-item">
+          <img src="../assets/default-avatar.png" class="avatar-sm" alt="user" />
+          <div class="comment-content">
+            <p><strong>Trần Đức</strong> Tuyệt vời quá! ❤️</p>
+          </div>
         </div>
       </div>
 
       <div class="comment-form">
-        <input type="text" placeholder="Viết bình luận..." id="commentInput" />
-        <button id="sendCommentBtn">Gửi</button>
+        <input type="text" placeholder="Viết bình luận..." id="overlayCommentInput" />
+        <button id="overlaySendBtn">Gửi</button>
       </div>
     </div>
   </div>

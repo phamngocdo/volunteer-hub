@@ -6,6 +6,7 @@ import json
 from typing import List, Optional
 from src.config.db_config import get_db
 from src.services.reacts_service import ReactService
+from src.services.users_service import UserService
 from src.schemas.reacts_schemas import *
 from src.config.redis_config import redis_client as r
 
@@ -25,11 +26,12 @@ async def create_react(request: Request, post_id: int, body: ReactCreate, db: Se
     session_json = await r.get(token)
     if not session_json:
         raise HTTPException(status_code=401, detail="Session expired or invalid")
-    if session_json['role'] == "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin not authorized")
     
     try:
-        user = json.loads(session_json)
+        # Kiểm tra JWT, signature và expiry giống /users/me
+        user = await UserService.get_current_user(token=token, db=db)
+        if user.get("role") == "admin":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin not authorized")
         if user.get("status") == "banned":
             raise HTTPException(status_code=403, detail="Your account has been banned")
         user_id = user.get("user_id")
@@ -56,7 +58,10 @@ async def delete_react(request: Request, post_id: int, db: Session = Depends(get
         raise HTTPException(status_code=401, detail="Session expired or invalid")
 
     try:
-        user = json.loads(session_json)
+        # Kiểm tra JWT, signature và expiry giống /users/me
+        user = await UserService.get_current_user(token=token, db=db)
+        if user.get("role") == "admin":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin not authorized")
         if user.get("status") == "banned":
             raise HTTPException(status_code=403, detail="Your account has been banned")
         user_id = user.get("user_id")
