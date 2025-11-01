@@ -34,21 +34,42 @@ async def get_current_user(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
 
 @users_router.put("/me")
-async def update_password(data: UserUpdate, request: Request, db: Session = Depends(get_db)):
-    try:
-        token = request.session.get("access_token")
-        if not token:
-            raise HTTPException(status_code=401, detail="Unauthorized")
+async def update_user_info(
+    data: UserUpdate, 
+    request: Request, 
+    db: Session = Depends(get_db)
+):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
+    token = auth_header.split(" ")[1]
+    session_json = await r.get(token)
+
+    if not session_json:
+        raise HTTPException(status_code=401, detail="Session expired or invalid")
+
+    try:
         user_data = {
-            "password": data.password
+            "first_name": data.first_name,
+            "last_name": data.last_name,
+            "email": data.email,
+            "phone_number": data.phone_number,
+            "old_password": data.old_password,
+            "new_password": data.new_password,
         }
+
         await UserService.update_current_user(token=token, user_data=user_data, db=db)
-        return JSONResponse(status_code=200, content={"message": "Update password successfull"})
+
+        return JSONResponse(
+            status_code=200,
+            content={"message": "User information updated successfully"}
+        )
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except (ExpiredSignatureError, InvalidTokenError) as e:
         raise HTTPException(status_code=401, detail=f"Unauthorized: {e}")
-    except ValueError as e:
-        raise HTTPException(status_code=401, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
 

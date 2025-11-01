@@ -55,28 +55,31 @@ class UserService():
             if not user:
                 raise ValueError("User not found")
 
-            if "password" in user_data:
-                password = user_data["password"]
-                if not verify_password(password, user.password):
-                    raise ValueError("Wrong current password")
-                else:
-                    user_data["password"] = hash_password(password=password)
-            
+            user_data = {k: v for k, v in user_data.items() if v not in [None, ""]}
+
+            if "old_password" in user_data:
+                old_password = user_data.pop("old_password")
+                new_password = user_data.pop("new_password", None)
+                if not verify_password(old_password, user.password):
+                    raise ValueError("Sai mật khẩu cũ")
+                if new_password:
+                    user.password = hash_password(new_password)
+
             for key, value in user_data.items():
                 setattr(user, key, value)
-                
+
             db.commit()
             db.refresh(user)
 
             user_dict = user.__dict__.copy()
             user_dict.pop("password", None)
             return user_dict
-        
-        except (ExpiredSignatureError, InvalidTokenError) as e:
-            raise
+
+        except (ExpiredSignatureError, InvalidTokenError):
+            raise ValueError("Invalid or expired token")
         except Exception as e:
             traceback.print_exc()
-            raise
+            raise ValueError(e)
     
     @staticmethod
     async def get_user_history(db: Session, user_id: int) -> List[EventRegistration]:

@@ -5,7 +5,12 @@ from src.schemas.base_schemas import UserBase
 from src.schemas.events_schemas import EventSimple 
 
 class UserUpdate(UserBase):
-    password: str
+    first_name:str
+    last_name:str
+    email: EmailStr
+    phone_number: str
+    old_password: Optional[str]
+    new_password: Optional[str]
 
 class HistoryItem(BaseModel):
     """
