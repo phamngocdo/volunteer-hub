@@ -1,19 +1,6 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:15
-    container_name: postgres_db
-    restart: always
-    ports:
-      - "5432:5432"   # expose DB để kết nối từ host
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: example
-      POSTGRES_DB: volunteerhub   # tạo sẵn DB
-    volumes:
-      - pgdata:/var/lib/postgresql/data  # volume lưu dữ liệu postgres
-
   redis:
     image: redis:latest
     container_name: redis
@@ -21,7 +8,37 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data  # Lưu dữ liệu redis (tùy chọn)
+      - redis_data:/data
+    networks:
+      - backend-net
+
+  redis_insight:
+    image: redis/redisinsight:latest
+    container_name: redis_insight
+    restart: always
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight_data:/data
+    depends_on:
+      - redis
+    networks:
+      - backend-net
+
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: volunteerhub
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend-net
 
   adminer:
     image: adminer
@@ -29,7 +46,14 @@ services:
     restart: always
     ports:
       - "8080:8080"
+    networks:
+      - backend-net
 
 volumes:
-  pgdata:
   redis_data:
+  redisinsight_data:
+  pgdata:
+
+networks:
+  backend-net:
+    driver: bridge

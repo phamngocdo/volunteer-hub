@@ -18,3 +18,4 @@ class UserBase(BaseModel):
     first_name: str
     last_name: str
     phone_number: Optional[str] = None
+    

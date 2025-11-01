@@ -55,5 +55,8 @@ def start():
         reload_dirs=[str(SRC_DIR)]
     )
 
+# if __name__ == "__main__":
+#     start()
+
 if __name__ == "__main__":
     start()
