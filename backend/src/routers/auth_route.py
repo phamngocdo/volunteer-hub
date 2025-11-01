@@ -45,7 +45,7 @@ async def login(request: Request, login_data: AuthLogin, db: Session = Depends(g
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Redis error: {e}")
 
-        return JSONResponse(content={"access_token": auth_result["access_token"], "token_type": "Bearer"})
+        return JSONResponse(content={"access_token": auth_result["access_token"], "token_type": "Bearer", "role": auth_result["user"]["role"]})
 
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
