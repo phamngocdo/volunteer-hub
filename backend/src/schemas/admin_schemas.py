@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import date
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional, List
 from enum import Enum
 
@@ -78,3 +78,35 @@ class EventAdminView(BaseModel):
 
     class Config:
         from_attributes = True
+
+# --- Schemas dùng cho việc Export Dữ liệu ---
+
+class UserExport(BaseModel):
+    user_id: int
+    first_name: str
+    last_name: str
+    email: str
+    role: str
+    status: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        # Giúp Pydantic đọc dữ liệu từ các đối tượng SQLAlchemy
+        from_attributes = True # (hoặc orm_mode = True cho Pydantic v1)
+
+class EventExport(BaseModel):
+    event_id: int
+    title: str
+    description: Optional[str] = None
+    location: Optional[str] = None
+    status: str
+    created_at: datetime
+    updated_at: datetime
+    start_date: date
+    end_date: date
+    manager_id: int
+    # Thêm các trường khác của Event nếu cần
+
+    class Config:
+        from_attributes = True # (hoặc orm_mode = True cho Pydantic v1)

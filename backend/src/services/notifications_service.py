@@ -29,6 +29,7 @@ class NotificationService:
                 Notification.user_id == user_id
             )
             noti = db.execute(query).scalar_one_or_none()# lấy duy nhất 1 kết quả hoặc None nếu không có
+            # Nếu không tìm thấy thông báo
             if not noti:
                 return False
             noti.is_read = is_read

@@ -1,4 +1,8 @@
 import traceback
+import json
+import io
+import csv
+from fastapi.responses import JSONResponse, StreamingResponse
 from enum import Enum
 from fastapi import APIRouter, Depends, status, HTTPException, Query, Request
 from sqlalchemy.orm import Session
@@ -35,7 +39,8 @@ async def get_current_admin_user(request: Request, db: Session = Depends(get_db)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired or invalid")
 
     try:
-        if session_json.get('role') != 'admin':
+        session_json = json.loads(session_json)
+        if session_json['role'] != 'admin':
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN, 
                 detail="Not authorized. Admin role required."
@@ -55,22 +60,35 @@ async def get_current_admin_user(request: Request, db: Session = Depends(get_db)
 # --- Khởi tạo Router với Dependency xác thực chung ---
 
 admin_router = APIRouter(
-    # DÒNG QUAN TRỌNG: Áp dụng dependency này cho TẤT CẢ các endpoint bên dưới
+    # DÒNG QUAN TRỌNG: Áp dụng dependency này cho TẤT CẢ các endpoint bên dưới2
     dependencies=[Depends(get_current_admin_user)]
 )
 
 # --- User Management Endpoints ---
 
-@admin_router.get("/users", 
-            response_model=List[admin_schemas.UserAdminView],
-            summary="Lấy danh sách tất cả người dùng")
-async def get_all_users(db: Session = Depends(get_db)):
+@admin_router.get("/users",
+                  response_model=List[admin_schemas.UserAdminView],
+                  summary="Lấy danh sách tất cả người dùng (có thể lọc theo status)")
+async def get_all_users(
+    db: Session = Depends(get_db),
+    status: Optional[str] = Query(None, description="Lọc theo trạng thái (ví dụ: 'active', 'banned')")
+):
     """
     API để admin lấy danh sách tất cả người dùng.
+    Có thể lọc theo trạng thái (status) qua query parameter.
     (Không cần `Depends` ở đây nữa vì đã được áp dụng chung)
     """
     try:
-        query = select(User).order_by(User.created_at.desc())
+        # Bắt đầu câu query cơ bản
+        query = select(User)
+        
+        # Thêm điều kiện lọc 'where' nếu 'status' được cung cấp
+        if status:
+            query = query.where(User.status == status)
+            
+        # Luôn sắp xếp theo ngày tạo mới nhất
+        query = query.order_by(User.created_at.desc())
+        
         result = db.execute(query)
         return result.scalars().all()
     except Exception:
@@ -170,27 +188,36 @@ async def export_users_data(
 ):
     """
     API để admin xuất toàn bộ dữ liệu người dùng ra file CSV hoặc JSON.
+    Đã sửa để xử lý datetime và chỉ xuất các trường trong schema UserExport.
     """
-    users = db.query(User).all()
+    # Sửa: Dùng select()
+    users_db = db.execute(select(User)).scalars().all()
     
+    # Sửa: Chuyển đổi sang Pydantic model
+    try:
+        users_export = [admin_schemas.UserExport.from_orm(user) for user in users_db]
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error parsing user data: {e}")
+
     if format == ExportFormat.json:
-        # Chuyển đổi đối tượng SQLAlchemy thành dict, loại bỏ password
-        users_data = [
-            {c.name: getattr(user, c.name) for c in user.__table__.columns if c.name != 'password'}
-            for user in users
-        ]
-        return JSONResponse(content=users_data)
+        # Sửa: Dùng .model_dump() (Pydantic v2) hoặc .dict() (Pydantic v1)
+        # Pydantic đã tự động chuyển datetime thành string
+        users_data = [user.model_dump() for user in users_export]
+        safe_data = json.loads(json.dumps(users_data, default=str))
+        return JSONResponse(content=safe_data)
 
     if format == ExportFormat.csv:
         output = io.StringIO()
         writer = csv.writer(output)
         
-        # Viết header (loại bỏ cột password)
-        headers = [c.name for c in User.__table__.columns if c.name != 'password']
+        # Sửa: Lấy header từ Pydantic model để đảm bảo nhất quán
+        headers = list(admin_schemas.UserExport.model_fields.keys()) # Pydantic v2
+        # (Dùng list(UserExport.__fields__.keys()) cho Pydantic v1)
         writer.writerow(headers)
         
-        # Viết dữ liệu
-        for user in users:
+        # Sửa: Ghi dữ liệu từ Pydantic model
+        for user in users_export:
             writer.writerow([getattr(user, h) for h in headers])
             
         output.seek(0)
@@ -203,25 +230,36 @@ async def export_events_data(
 ):
     """
     API để admin xuất toàn bộ dữ liệu sự kiện ra file CSV hoặc JSON.
+    Đã sửa để xử lý datetime và chỉ xuất các trường trong schema EventExport.
     """
-    events = db.query(Event).all()
+    # Sửa: Dùng select()
+    events_db = db.execute(select(Event)).scalars().all()
+
+    # Sửa: Chuyển đổi sang Pydantic model
+    try:
+        events_export = [admin_schemas.EventExport.from_orm(event) for event in events_db]
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Error parsing event data: {e}")
 
     if format == ExportFormat.json:
-        events_data = [
-            {c.name: getattr(event, c.name) for c in event.__table__.columns}
-            for event in events
-        ]
-        # Xử lý các kiểu dữ liệu không thể serialize (Date, Datetime)
-        return JSONResponse(content=json.loads(json.dumps(events_data, indent=4, sort_keys=True, default=str)))
+        # Sửa: Dùng .model_dump() (Pydantic v2) hoặc .dict() (Pydantic v1)
+        # Bỏ qua cách làm json.dumps(json.loads()) không hiệu quả
+        events_data = [event.model_dump() for event in events_export]
+        safe_data = json.loads(json.dumps(events_data, default=str))
+        return JSONResponse(content=safe_data)
 
     if format == ExportFormat.csv:
         output = io.StringIO()
         writer = csv.writer(output)
         
-        headers = [c.name for c in Event.__table__.columns]
+        # Sửa: Lấy header từ Pydantic model
+        headers = list(admin_schemas.EventExport.model_fields.keys()) # Pydantic v2
+        # (Dùng list(EventExport.__fields__.keys()) cho Pydantic v1)
         writer.writerow(headers)
         
-        for event in events:
+        # Sửa: Ghi dữ liệu từ Pydantic model
+        for event in events_export:
             writer.writerow([getattr(event, h) for h in headers])
             
         output.seek(0)

@@ -1,0 +1,44 @@
+<link rel="stylesheet" href="../css/admin.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<div class="admin-container">
+
+  <div class="admin-content">
+
+    <div id="eventsPage" class="admin-page active-page">
+      <div class="page-header">
+        <h2>Quản lý Sự kiện</h2>
+        <div class="export-buttons">
+          <button id="exportEventsCSV" class="export-btn csv"><i class="fa-solid fa-file-csv"></i> Xuất CSV</button>
+          <button id="exportEventsJSON" class="export-btn json"><i class="fa-solid fa-file-code"></i> Xuất JSON</button>
+        </div>
+      </div>
+      <div class="filters">
+        <label for="eventStatusFilter">Lọc theo trạng thái:</label>
+        <select id="eventStatusFilter">
+          <option value="">Tất cả</option>
+          <option value="pending">Đang chờ duyệt</option>
+          <option value="approved">Đã duyệt</option>
+          <option value="rejected">Đã từ chối</option>
+          <option value="completed">Đã hoàn thành</option>
+        </select>
+      </div>
+      <div class="table-container" id="eventsTableContainer">
+        <p>Đang tải dữ liệu sự kiện...</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="adminModal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <button class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+    <h3 id="modalTitle" class="modal-title">Xác nhận hành động</h3>
+    <p id="modalMessage">Bạn có chắc chắn muốn thực hiện hành động này?</p>
+    <div class="modal-footer">
+      <button id="modalCancelBtn" class="modal-btn cancel">Hủy</button>
+      <button id="modalConfirmBtn" class="modal-btn confirm">Xác nhận</button>
+    </div>
+  </div>
+</div>
