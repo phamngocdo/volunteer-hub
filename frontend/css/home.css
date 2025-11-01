@@ -27,16 +27,6 @@ body {
   flex-wrap: wrap;
 }
 
-.filters input[type="text"] {
-  flex: 1;
-  min-width: 220px;
-}
-
-.filters select,
-.filters input[type="date"] {
-  flex: 0 0 180px;
-}
-
 .filters input,
 .filters select {
   padding: 0.5rem 0.75rem;
@@ -46,42 +36,106 @@ body {
   background: var(--bg);
   color: var(--text);
   text-align: left;
+  outline: none;
+  transition: border-color 0.2s ease;
 }
 
-@media (max-width: 1024px) {
-  .filters {
-    flex-wrap: wrap;
-  }
-
-  .filters input[type="text"] {
-    flex: 1 1 100%;
-    order: -1;
-  }
-
-  .filters select,
-  .filters input[type="date"] {
-    flex: 1 1 calc(33.333% - 0.75rem);
-  }
+.filters input:focus,
+.filters select:focus {
+  border-color: var(--accent);
 }
 
-@media (max-width: 600px) {
+.filters input[type="text"]#searchInput {
+  flex: 1;
+  min-width: 220px;
+}
+
+.filters select {
+  flex: 0 0 180px;
+}
+
+.date-filter {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.date-filter i {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text);
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.date-filter input[type="text"] {
+  padding-left: 2rem;
+  background-color: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  width: 100%;
+}
+
+@media (max-width: 835px) {
   .filters {
-    flex-wrap: wrap;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
 
-  .filters input[type="text"],
+  .filters input[type="text"]#searchInput {
+    grid-column: 1 / 2;
+  }
+
+  .date-filter {
+    grid-column: 2 / 3;
+  }
+
+  .filters select:nth-of-type(1) {
+    grid-column: 1 / 2;
+  }
+
+  .filters select:nth-of-type(2) {
+    grid-column: 2 / 3;
+  }
+
+  .filters input,
   .filters select,
-  .filters input[type="date"],
-  .filters button {
-    flex: 1 1 100%;
+  .date-filter input[type="text"] {
     font-size: 0.85rem;
     padding: 0.4rem 0.5rem;
-    min-width: 0;
+    width: 100%;
   }
 
-  .filters label {
-    font-size: 0.85rem;
+  .date-filter i {
+    left: auto;
+    right: 10px;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .date-filter input[type="text"] {
+    padding-right: 2rem;
+    padding-left: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .filters {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .filters input,
+  .filters select,
+  .date-filter {
+    flex: 1 1 100%;
+    width: 100%;
   }
 }
 
@@ -98,6 +152,8 @@ body {
   overflow: hidden;
   position: relative;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: cardFadeIn 0.5s ease forwards;
+
 }
 
 .event-card:hover {
@@ -218,7 +274,7 @@ body {
 }
 
 .join-btn {
-  background: linear-gradient(135deg, #007bff, #00b4d8);
+  background: black;
   color: #fff;
   padding: 0.7rem 1.4rem;
   border: none;
@@ -227,7 +283,7 @@ body {
   font-weight: 600;
   font-size: 1rem;
   transition: all 0.25s ease;
-  box-shadow: 0 3px 10px rgba(0, 123, 255, 0.4);
+  box-shadow: 0 3px 10px rgba(63, 63, 63, 0.4);
 }
 
 .join-btn:hover {
@@ -262,5 +318,17 @@ body {
   to {
     transform: translateY(0);
     opacity: 1;
+  }
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

@@ -58,7 +58,7 @@ export async function initHeader() {
   });
 
   window.addEventListener("resize", () => {
-    if (window.innerWidth > 860) {
+    if (window.innerWidth > 900) {
       nav.classList.remove("open");
       overlay.classList.remove("show");
     }

@@ -100,7 +100,7 @@ export function initHomePage() {
     modal.classList.remove("hidden");
     updateJoinButton(ev.event_id);
 
-    history.pushState({ modal: true, eventId: ev.event_id }, "", `/events/${ev.event_id}`);
+    history.pushState({ modal: true, eventId: ev.event_id }, "", `?event=${ev.event_id}`);
   }
 
   function closeModal(push = true) {
