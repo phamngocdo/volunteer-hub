@@ -228,6 +228,15 @@ body {
   animation: fadeIn 0.25s ease;
 }
 
+.modal .title {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.modal .subtitle {
+  font-size: 1rem;
+}
+
 .modal-content {
   background: var(--bg);
   color: var(--text);
@@ -245,7 +254,9 @@ body {
 
 .modal-image {
   width: 100%;
+  aspect-ratio: 1.618 / 1;
   border-radius: 10px;
+  margin-top: 1.2rem;
   margin-bottom: 1.2rem;
   object-fit: cover;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);

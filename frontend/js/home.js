@@ -10,8 +10,6 @@ export function initHomePage() {
   const modal = document.getElementById("eventModal");
   const modalImage = document.getElementById("modalImage");
   const modalTitle = document.getElementById("modalTitle");
-  const modalLocation = document.getElementById("modalLocation");
-  const modalDate = document.getElementById("modalDate");
   const modalDescription = document.getElementById("modalDescription");
   const joinBtn = document.getElementById("joinEventBtn");
   const joinError = document.getElementById("joinError");
@@ -72,7 +70,7 @@ export function initHomePage() {
         <div class="event-content">
           <h3 class="event-title">${ev.title}</h3>
           <p class="event-meta"><i class="fa-solid fa-location-dot"></i> <strong>Địa điểm:</strong> ${ev.location}</p>
-          <p class="event-meta"><i class="fa-solid fa-person"></i> <strong>Số người tham gia:</strong> ${volunteer_number}</p>
+          <p class="event-meta"><i class="fa-solid fa-person"></i> <strong>Số người đã tham gia:</strong> ${volunteer_number}</p>
           <p class="event-meta"><i class="fa-solid fa-calendar-days"></i> <strong>Thời gian:</strong> ${start} - ${end}</p>
         </div>
       `;
@@ -90,8 +88,10 @@ export function initHomePage() {
 
     modalDescription.innerHTML = `
     <p class="event-meta"><i class="fa-solid fa-location-dot"></i> <strong>Địa điểm:</strong> ${ev.location}</p>
-    <p class="event-meta"><i class="fa-solid fa-person"></i> <strong>Số người tham gia:</strong> ${ev.volunteer_number}</p>
+    <p class="event-meta"><i class="fa-solid fa-person"></i> <strong>Số người đã tham gia:</strong> ${ev.volunteer_number}</p>
     <p class="event-meta"><i class="fa-solid fa-calendar-days"></i> <strong>Thời gian:</strong> ${formatDate(ev.start_date)} - ${formatDate(ev.end_date)}</p>
+    </br>
+    <h2 class="modal-subtitle">Mô tả sự kiện</h2>
     </br>
     <div class="event-desc-text">${ev.description || "Không có mô tả."}</div>
   `;
@@ -127,6 +127,13 @@ export function initHomePage() {
   }
 
   async function updateJoinButton(eventId) {
+    const userRole = localStorage.getItem("role");
+
+    if (userRole === "manager") {
+      joinBtn.style.display = "none";
+      return;
+    }
+
     const status = await fetchRegistrationStatus(eventId);
     joinBtn.disabled = false;
     joinBtn.classList.remove("disabled");

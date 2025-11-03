@@ -17,6 +17,11 @@ export async function initHeader() {
   const userArea = document.getElementById("user-area");
 
   const menuByRole = {
+    guest: [
+      { href: "/", label: "Trang chủ" },
+      { href: "/contact", label: "Liên hệ" },
+      { href: "/about", label: "Về chúng tôi" },
+    ],
     volunteer: [
       { href: "/", label: "Trang chủ" },
       { href: "/event-wall", label: "Kênh trao đổi" },
@@ -73,21 +78,21 @@ export async function initHeader() {
       const res = await fetch("http://localhost:8000/api/users/me", {
         headers: { "Authorization": `${token_type} ${token}` }
       });
-      if (res.status === 401) { renderGuestActions(); renderMenu("volunteer"); return; }
+      if (res.status === 401) { renderGuestActions(); renderMenu("guest"); return; }
       if (!res.ok) throw new Error(`Unexpected status: ${res.status}`);
       const user = await res.json();
-      const role = user.role || "volunteer";
+      const role = user.role || "guest";
       renderMenu(role);
       renderUserActions(role, user);
     } catch {
       renderGuestActions();
-      renderMenu("volunteer");
+      renderMenu("guest");
     }
   }
 
   function renderMenu(role) {
     navList.innerHTML = "";
-    (menuByRole[role] || menuByRole["volunteer"]).forEach(item => {
+    (menuByRole[role] || menuByRole["guest"]).forEach(item => {
       const li = document.createElement("li");
       const a = document.createElement("a");
       a.href = item.href;
