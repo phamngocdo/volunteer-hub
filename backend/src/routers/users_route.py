@@ -73,26 +73,6 @@ async def update_user_info(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
 
-@users_router.get("/me/history", response_model=List[HistoryItem])
-async def get_my_participation_history(
-    request: Request,
-    db: Session = Depends(get_db)
-):
-    """
-    Lấy danh sách lịch sử các sự kiện đã đăng ký/tham gia của người dùng.
-    """
-    user = request.session.get("user")
-    if not user:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
-    role = user["role"]
-    if role != "volunteer":
-        raise HTTPException(status_code=403, detail="Not authorized to view history")
-    
-    user_id = user["user_id"]
-
-    history_items = await UserService.get_user_history(db=db, user_id=user_id)
-    return history_items
 
 @users_router.get("/me/history", 
                 response_model=List[HistoryItem],

@@ -43,37 +43,6 @@ class AuthService:
             traceback.print_exc()
             raise
 
-    @staticmethod
-    async def login_with_google(db: Session, email: str):
-        """
-        Đăng nhập/Đăng ký bằng Google.
-        """
-
-        try:
-            query = select(User).where(User.email == email)
-            result = db.execute(query)
-            user = result.scalar_one_or_none()
-
-            if not user:
-                return None
-
-            token_data = {"sub": str(user.user_id)}
-            access_token = create_access_token(data=token_data)
-
-            return {
-                "access_token": access_token,
-                "user": {
-                    "user_id": user.user_id,
-                    "email": user.email,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "role": user.role,
-                    "status": user.status
-                }
-            }
-        except Exception as e:
-            traceback.print_exc()
-            raise
 
     @staticmethod
     async def register(db: Session, user_data: dict):
@@ -87,7 +56,11 @@ class AuthService:
 
             user_email = db.query(User).filter(User.email == email).first()
             if user_email:
-                raise ValueError("Email already exists")
+                raise ValueError("Email đã được sử dụng")
+            
+            phone_number = db.query(User).filter(User.phone_number == phone_number).first()
+            if phone_number:
+                raise ValueError("Số điện thoại đã được sử dụng")
             
             hash_pw = hash_password(password)
 

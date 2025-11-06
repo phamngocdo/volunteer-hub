@@ -20,17 +20,15 @@
 
     <div class="form-group">
       <label for="email"><strong>Email</strong></label>
-      <input type="email" id="email" name="email" required autocomplete="off" />
+      <input type="email" id="email" name="email" required autocomplete="off" disabled />
       <span class="error-message"></span>
     </div>
 
     <div class="form-group">
       <label for="phone_number"><strong>Số điện thoại</strong></label>
-      <input type="tel" id="phone_number" name="phone_number" autocomplete="off" />
+      <input type="tel" id="phone_number" name="phone_number" pattern="^0\d{9}$" autocomplete="off" required />
       <span class="error-message"></span>
     </div>
-
-    <hr />
 
     <div class="form-group password-group">
       <label for="old_password"><strong>Mật khẩu cũ</strong></label>

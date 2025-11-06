@@ -19,7 +19,6 @@ function initEmailRegister(form) {
   const roleSelect = form.querySelector("#role");
   const registerButton = form.querySelector(".btn-login");
 
-  // Tạo message box chung
   const messageBox = document.createElement("div");
   messageBox.className = "message-box";
   Object.assign(messageBox.style, {
@@ -32,7 +31,6 @@ function initEmailRegister(form) {
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    // Lấy giá trị input
     const first_name = firstNameInput.value.trim();
     const last_name = lastNameInput.value.trim();
     const phone_number = phoneInput.value.trim();
@@ -41,31 +39,36 @@ function initEmailRegister(form) {
     const confirm_password = confirmPasswordInput.value;
     const role = roleSelect.value;
 
-    // Validate cơ bản
     if (!first_name || !last_name || !phone_number || !email || !password || !confirm_password || !role) {
       showMessage(messageBox, "Vui lòng nhập đầy đủ thông tin.", "red");
       return;
     }
 
-    // Validate số điện thoại
     if (!/^0\d{9}$/.test(phone_number)) {
-      showMessage(messageBox, "Số điện thoại không hợp lệ. Ví dụ: 0123456789", "red");
+      showMessage(messageBox, "Số điện thoại không hợp lệ.", "red");
       return;
     }
 
-    // Validate email
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       showMessage(messageBox, "Email không hợp lệ.", "red");
       return;
     }
 
-    // Kiểm tra password
+    if (password.length < 6) {
+      showMessage(messageBox, "Mật khẩu phải có ít nhất 6 ký tự.", "red");
+      return;
+    }
+
     if (password !== confirm_password) {
       showMessage(messageBox, "Mật khẩu và xác nhận mật khẩu không khớp.", "red");
       return;
     }
 
-    // Disable button
+    if (role === "") {
+      showMessage(messageBox, "Vui lòng chọn vai trò.", "red");
+      return;
+    }
+
     registerButton.disabled = true;
     registerButton.innerText = "Đang đăng ký...";
 

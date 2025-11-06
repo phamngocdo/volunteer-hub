@@ -113,6 +113,20 @@ async def update_user_status(
         user_to_update.status = status_update.status.value
         db.commit()
         db.refresh(user_to_update)
+        try:
+            all_keys = await r.keys("*")
+            for key in all_keys:
+                data = await r.get(key)
+                if not data:
+                    continue
+                session = json.loads(data)
+                if session.get("user_id") == user_id:
+                    session["status"] = user_to_update.status
+                    await r.set(key, json.dumps(session))
+
+        except Exception as redis_error:
+            print(f"Redis sync failed: {redis_error}")
+
         return user_to_update
     except Exception:
         db.rollback()

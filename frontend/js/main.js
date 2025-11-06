@@ -87,6 +87,7 @@ export async function initHeader() {
     } catch {
       renderGuestActions();
       renderMenu("guest");
+      localStorage.setItem("role", "guest");
     }
   }
 
@@ -130,6 +131,8 @@ export async function initHeader() {
         const token_type = localStorage.getItem("token_type");
         localStorage.removeItem("access_token");
         localStorage.removeItem("token_type");
+        localStorage.removeItem("role");
+        localStorage.removeItem("status");
         const res = await fetch("http://localhost:8000/auth/logout", {
           method: "POST",
           credentials: "include",
@@ -154,6 +157,14 @@ await loadComponent("footer-container", "./components/footer.html");
 const main = document.getElementById("main-content");
 
 export async function navigateTo(page) {
+  const status = localStorage.getItem("status");
+  if (status === "banned") {
+    const res = await fetch(`./pages/banned.html`);
+    const html = await res.text();
+    main.innerHTML = html;
+    window.history.pushState({}, "", `/${page}`);
+    return;
+  }
   const res = await fetch(`./pages/${page}.html`);
   const html = await res.text();
   main.innerHTML = html;

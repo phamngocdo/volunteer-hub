@@ -28,7 +28,7 @@
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 13px;
 }
 
 .login-form label {
@@ -46,6 +46,7 @@
 .name-field {
   flex: 1;
   display: flex;
+  gap: 13px;
   flex-direction: column;
 }
 
@@ -102,8 +103,7 @@ select:hover {
 .role-container {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  margin-top: 10px;
+  gap: 13px;
 }
 
 .login-form .btn {
@@ -115,8 +115,6 @@ select:hover {
   cursor: pointer;
   text-decoration: none;
 }
-
-
 
 .btn-login {
   background-color: var(--fg);
@@ -162,7 +160,7 @@ select:hover {
 }
 
 .extra-links a {
-  color: var(--fg);
+  color: rgb(5, 197, 255);
   text-decoration: none;
   font-weight: 500;
 }

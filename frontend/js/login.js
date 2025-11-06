@@ -53,6 +53,7 @@ function initEmailLogin(form) {
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("token_type", data.token_type);
         localStorage.setItem("role", data.role);
+        localStorage.setItem("status", data.status);
         initHeader();
         window.location.href = "/";
       } else if (res.status === 401) {

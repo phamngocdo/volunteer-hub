@@ -38,14 +38,15 @@ async def login(request: Request, login_data: AuthLogin, db: Session = Depends(g
         session_data = {
             "user_id": auth_result["user"]["user_id"],
             "email": auth_result["user"]["email"],
-            "role": auth_result["user"]["role"]
+            "role": auth_result["user"]["role"],
+            "status": auth_result["user"]["status"]
         }
         try:
             await r.set(token, json.dumps(session_data), ex=SESSION_EXPIRE_SECONDS)
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Redis error: {e}")
 
-        return JSONResponse(content={"access_token": auth_result["access_token"], "token_type": "Bearer", "role": auth_result["user"]["role"]})
+        return JSONResponse(content={"access_token": auth_result["access_token"], "token_type": "Bearer", "role": auth_result["user"]["role"], "status": auth_result["user"]["status"]})
 
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))

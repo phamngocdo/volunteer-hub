@@ -1,3 +1,5 @@
+import { navigateTo } from "./main.js";
+
 export function initHomePage() {
   const container = document.getElementById("eventsContainer");
   if (!container) return;
@@ -129,16 +131,23 @@ export function initHomePage() {
   async function updateJoinButton(eventId) {
     const userRole = localStorage.getItem("role");
 
-    if (userRole === "manager") {
+    if (userRole === "manager" || userRole === "admin") {
       joinBtn.style.display = "none";
       return;
     }
 
-    const status = await fetchRegistrationStatus(eventId);
     joinBtn.disabled = false;
     joinBtn.classList.remove("disabled");
 
     joinBtn.innerHTML = "";
+
+    if (userRole === "guest") {
+      joinBtn.innerHTML = `<i class="fa-solid fa-plus"></i> Tham gia sự kiện`;
+      joinBtn.onclick = async () => await navigateTo("/login");
+      return;
+    }
+
+    const status = await fetchRegistrationStatus(eventId);
 
     switch (status) {
       case "approved":

@@ -54,6 +54,14 @@ function validateForm() {
     return false;
   }
 
+  if (!/^0\d{9}$/.test(phone)) {
+    formError.style.display = "block";
+    formError.style.color = "var(--error)";
+    formError.textContent = "Số điện thoại không hợp lệ.";
+    return false;
+  }
+
+
   const anyPasswordFilled = oldPassword || newPassword || confirmPassword;
   if (anyPasswordFilled) {
     if (!oldPassword || !newPassword || !confirmPassword) {
@@ -62,6 +70,14 @@ function validateForm() {
       formError.textContent = "Khi thay đổi mật khẩu, tất cả các trường mật khẩu phải được điền.";
       return false;
     }
+
+    if (newPassword.length < 6) {
+      formError.style.display = "block";
+      formError.style.color = "var(--error)";
+      formError.textContent = "Mật khẩu mới phải có ít nhất 6 ký tự";
+      return false;
+    }
+
     if (newPassword !== confirmPassword) {
       formError.style.display = "block";
       formError.style.color = "var(--error)";

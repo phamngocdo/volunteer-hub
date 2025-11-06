@@ -250,6 +250,7 @@ body {
   transform: translateY(-15px);
   animation: slideUp 0.35s ease forwards;
   transition: all 0.3s ease;
+  overflow-y: auto;
 }
 
 .modal-image {
@@ -264,8 +265,8 @@ body {
 
 .modal-close {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 5px;
+  left: 5px;
   background: rgba(255, 255, 255, 0.15);
   border: none;
   font-size: 1.5rem;

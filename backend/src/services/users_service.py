@@ -19,6 +19,7 @@ class UserService():
         except Exception as e:
             traceback.print_exc()
             raise 
+
     
     @staticmethod
     async def get_user_by_email(email: str, db: Session):
@@ -31,6 +32,7 @@ class UserService():
         except Exception as e:
             traceback.print_exc()
             raise 
+
     
     @staticmethod
     async def get_current_user(token: str, db: Session):
@@ -46,6 +48,7 @@ class UserService():
         except Exception as e:
             traceback.print_exc()
             raise
+
     
     @staticmethod
     async def update_current_user(token: str, user_data: dict, db: Session):
@@ -80,6 +83,7 @@ class UserService():
         except Exception as e:
             traceback.print_exc()
             raise ValueError(e)
+        
     
     @staticmethod
     async def get_user_history(db: Session, user_id: int) -> List[EventRegistration]:
