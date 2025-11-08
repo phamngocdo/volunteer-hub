@@ -16,6 +16,7 @@ CREATE TABLE "users" (
   "password" TEXT NOT NULL,
   "phone_number" VARCHAR(100),
   "role" VARCHAR(20),
+  "avatar_url" VARCHAR(200)
   "status" VARCHAR(20),
   "created_at" TIMESTAMP DEFAULT NOW(),
   "updated_at" TIMESTAMP DEFAULT NOW()
@@ -89,9 +90,21 @@ CREATE TABLE "notifications" (
   "updated_at" TIMESTAMP DEFAULT NOW()
 );
 
+-- ================= PUSH_SUBSCRIPTIONS =================
+CREATE TABLE "push_subscriptions" (
+  "id" SERIAL PRIMARY KEY,
+  "user_id" INT,
+  "endpoint" TEXT NOT NULL,
+  "p256dh" TEXT NOT NULL,
+  "auth" TEXT NOT NULL,
+  "created_at" TIMESTAMP DEFAULT NOW(),
+  "updated_at" TIMESTAMP DEFAULT NOW(),
+);
+
 -- ================= INDEXES =================
 CREATE UNIQUE INDEX ON "event_registrations" ("event_id", "user_id");
 CREATE UNIQUE INDEX ON "reacts" ("post_id", "user_id");
+CREATE UNIQUE INDEX ON "push_subscriptions" ("user_id", "endpoint");
 
 -- ================= COMMENTS =================
 COMMENT ON COLUMN "users"."role" IS 'volunteer | manager | admin';
@@ -99,6 +112,9 @@ COMMENT ON COLUMN "users"."status" IS 'active | banned | pending';
 COMMENT ON COLUMN "events"."status" IS 'pending | approved | rejected | completed';
 COMMENT ON COLUMN "event_registrations"."status" IS 'pending | approved | rejected | cancelled | completed';
 COMMENT ON COLUMN "reacts"."category" IS 'like | ...';
+COMMENT ON COLUMN "push_subscriptions"."endpoint" IS 'Web Push subscription endpoint for user';
+COMMENT ON COLUMN "push_subscriptions"."p256dh" IS 'Web Push p256dh key';
+COMMENT ON COLUMN "push_subscriptions"."auth" IS 'Web Push auth key';
 
 -- ================= FOREIGN KEYS =================
 ALTER TABLE "events" ADD FOREIGN KEY ("manager_id") REFERENCES "users" ("user_id");
@@ -112,6 +128,7 @@ ALTER TABLE "reacts" ADD FOREIGN KEY ("post_id") REFERENCES "posts" ("post_id");
 ALTER TABLE "reacts" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
 ALTER TABLE "notifications" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
 ALTER TABLE "notifications" ADD FOREIGN KEY ("event_id") REFERENCES "events" ("event_id");
+ALTER TABLE "push_subscriptions" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("user_id");
 
 -- ================= SAMPLE DATA =================
 INSERT INTO users (first_name, last_name, email, password, phone_number, role, status)
