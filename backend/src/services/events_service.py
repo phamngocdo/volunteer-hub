@@ -1,6 +1,6 @@
 import traceback
 from sqlalchemy.orm import Session
-from sqlalchemy import select, update, func
+from sqlalchemy import select, update, func, and_
 from sqlalchemy.future import select
 from datetime import date
 from typing import Optional, List
@@ -23,7 +23,90 @@ class EventService:
         except Exception as e:
             traceback.print_exc()
             raise
-    
+ 
+    @staticmethod
+    def get_joined_events(db: Session, current_user_id: int, role: str):
+        """
+        Nếu role = 'volunteer':
+            -> Lấy danh sách các sự kiện mà người dùng đã tham gia (status='approved' hoặc 'completed')
+        Nếu role = 'manager':
+            -> Lấy danh sách các sự kiện mà người dùng quản lý (manager_id = current_user_id)
+            -> Chỉ lấy các event.status = 'approved' hoặc 'completed'
+        Trả về:
+            - event_id
+            - title
+            - image_url
+            - member_count (số người có status='approved' hoặc 'completed')
+        """
+        try:
+            if role == "volunteer":
+                # Lấy danh sách event_id mà user tham gia
+                joined_event_ids = (
+                    db.query(EventRegistration.event_id)
+                    .filter(
+                        EventRegistration.user_id == current_user_id,
+                        EventRegistration.status.in_(["approved", "completed"])
+                    )
+                    .subquery()
+                )
+
+                # Lấy thông tin sự kiện + count member
+                events = (
+                    db.query(
+                        Event.event_id,
+                        Event.title,
+                        Event.image_url,
+                        func.count(
+                            func.nullif(EventRegistration.status.notin_(["approved", "completed"]), True)
+                        ).label("member_count")
+                    )
+                    .join(EventRegistration, Event.event_id == EventRegistration.event_id)
+                    .filter(Event.event_id.in_(joined_event_ids))
+                    .group_by(Event.event_id, Event.title, Event.image_url)
+                    .order_by(Event.title.asc())
+                    .all()
+                )
+
+            elif role == "manager":
+                # Lấy event mà manager quản lý và event.status = approved/completed
+                events = (
+                    db.query(
+                        Event.event_id,
+                        Event.title,
+                        Event.image_url,
+                        func.count(
+                            func.nullif(EventRegistration.status.notin_(["approved", "completed"]), True)
+                        ).label("member_count")
+                    )
+                    .outerjoin(EventRegistration, Event.event_id == EventRegistration.event_id)
+                    .filter(
+                        Event.manager_id == current_user_id,
+                        Event.status.in_(["approved", "completed"])
+                    )
+                    .group_by(Event.event_id, Event.title, Event.image_url)
+                    .order_by(Event.title.asc())
+                    .all()
+                )
+            else:
+                # Các role khác (admin, guest,...) không được phép
+                raise HTTPException(status_code=403, detail="Role not authorized")
+
+            # Trả về kết quả dạng list[dict]
+            return [
+                {
+                    "event_id": e.event_id,
+                    "title": e.title,
+                    "image_url": e.image_url,
+                    "member_count": e.member_count,
+                }
+                for e in events
+            ]
+
+        except Exception:
+            traceback.print_exc()
+            raise
+
+        
     @staticmethod
     async def get_public_events(
         db: Session,

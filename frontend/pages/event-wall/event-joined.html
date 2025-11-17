@@ -1,0 +1,96 @@
+<link rel="stylesheet" href="../css/event-wall.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<div class="event-wall-container">
+  <!-- Ô tạo bài viết -->
+  <div class="create-post-box-header">
+    <img src="/assets/default-avatar.png" class="avatar" />
+    <div class="create-post-input-header" id="openCreatePostOverlay">
+      <p>Bạn viết gì đi...</p>
+    </div>
+  </div>
+
+  <div class="event-tab-content" id="all">
+    <!-- Các bài post sẽ được load động vào đây -->
+  </div>
+</div>
+
+<!-- Overlay bài viết chi tiết -->
+<div id="postOverlay" class="post-overlay hidden">
+  <div class="post-overlay-box">
+    <!-- Tiêu đề -->
+    <div class="overlay-header">
+      <h3 id="overlayAuthorName">Bài viết của Nguyen Dui</h3>
+      <button id="closeOverlayBtn" class="close-overlay">&times;</button>
+    </div>
+
+    <!-- Nội dung -->
+    <div class="post-overlay-content">
+      <div id="overlayPostContent" class="overlay-post-content">
+        <!-- Nội dung bài post sẽ được JS thêm vào -->
+      </div>
+
+      <!-- Bình luận -->
+      <div class="overlay-comments">
+        <div class="comment-list" id="commentList">
+          <div class="comment-item">
+            <img src="/assets/default-avatar.png" class="avatar-comment" alt="user" />
+            <div class="comment-content">
+              <p><strong>Trần Đức</strong> Tuyệt vời quá! ❤️</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form bình luận -->
+    <div class="comment-form">
+      <input type="text" placeholder="Viết bình luận..." id="overlayCommentInput" />
+      <button id="overlaySendBtn">
+        <img src="/assets/send-comment.png" alt="Gửi" class="send-icon" />
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay tạo bài viết -->
+<div id="createPostOverlay" class="post-overlay hidden">
+  <div class="post-overlay-box">
+    <!-- Header -->
+    <div class="overlay-header">
+      <h3>Tạo bài viết mới</h3>
+      <button id="closeCreatePostBtn" class="close-overlay">&times;</button>
+    </div>
+
+    <!-- Nội dung tạo bài viết -->
+    <div class="create-post-overlay-content">
+      <!-- Avatar + tên + textarea -->
+      <div class="create-post-box">
+        <div class="post-header-row">
+          <div class="avatar-name">
+            <img src="/assets/default-avatar.png" alt="Avatar" class="avatar-sm" />
+            <span class="user-name">Quang Duy</span>
+          </div>
+          <div class="upload-section">
+            <label for="imageUpload" class="upload-btn">
+              <span class="upload-text">Thêm ảnh</i></span>
+              <img src="/assets/upload-image.png" alt="Upload" class="upload-icon" />
+            </label>
+            <input type="file" id="imageUpload" accept="image/*" hidden />
+          </div>
+        </div>
+        <!-- Textarea -->
+        <div class="post-input-container">
+          <textarea id="createPostInput" placeholder="Bạn đang nghĩ gì?"></textarea>
+          <!-- Ảnh preview -->
+          <div id="imagePreviewContainer" class="image-preview-container"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nút đăng bài -->
+    <div class="create-post-footer">
+      <button id="submitCreatePost" class="submit-btn">Đăng</button>
+    </div>
+  </div>
+</div>

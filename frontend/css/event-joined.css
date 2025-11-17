@@ -1,0 +1,44 @@
+@import url("./event-wall.css");
+
+/* Ẩn phần tab, vì trang này không có */
+.event-tabs {
+  display: none;
+}
+
+/* Thêm nút quay lại */
+.back-btn {
+  display: inline-block;
+  margin-bottom: 16px;
+  padding: 8px 14px;
+  border: none;
+  background: #3c3c3c;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.back-btn:hover {
+  background: #222;
+}
+
+/* Giữ style bài post từ event-wall.css */
+.event-wall-container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+/* Cho đẹp hơn trên mobile */
+@media (max-width: 768px) {
+  .event-wall-container {
+    padding: 10px;
+  }
+
+  .back-btn {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+}

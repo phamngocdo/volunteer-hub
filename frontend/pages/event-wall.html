@@ -5,51 +5,87 @@
   <div class="event-tabs">
     <button class="tab-btn active" data-tab="all">Tất cả sự kiện</button>
     <button class="tab-btn" data-tab="joined">Đã tham gia</button>
-    <button class="tab-btn" data-tab="upcoming">Sắp diễn ra</button>
+    <button class="tab-btn" data-tab="my-post">Bài viết của tôi</button>
   </div>
 
   <!-- Nội dung tab -->
   <div class="event-tab-content" id="all">
     <!-- Các bài post sẽ được load động vào đây -->
   </div>
-
+  <!-- Tab đã tham gia-->
   <div class="event-tab-content hidden" id="joined">
-    <p>Bạn chưa tham gia sự kiện nào.</p>
+    <div id="joinedEventsContainer">
+      <div class="joined-event">
+        <img src="../assets/event.png" alt="Event" class="event-avatar" />
+        <div class="event-info">
+          <h4 class="event-name">Hiến máu nhân đạo</h4>
+          <p class="member-count">100 thành viên</p>
+        </div>
+      </div>
+
+      <div class="joined-event">
+        <img src="../assets/event.jpg" alt="Event" class="event-avatar" />
+        <div class="event-info">
+          <h4 class="event-name">Dọn rác bãi biển Đà Nẵng</h4>
+          <p class="member-count">180 thành viên</p>
+        </div>
+      </div>
+
+      <div class="joined-event">
+        <img src="../assets/event.jpg" alt="Event" class="event-avatar" />
+        <div class="event-info">
+          <h4 class="event-name">Dọn rác bãi biển Đà Nẵng</h4>
+          <p class="member-count">180 thành viên</p>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="event-tab-content hidden" id="upcoming">
-    <p>Không có sự kiện sắp diễn ra.</p>
+  <div class="event-tab-content hidden" id="my-post">
+    <!-- Các bài post sẽ được load động vào đây -->
   </div>
 </div>
 
 <!-- Overlay bài viết chi tiết -->
 <div id="postOverlay" class="post-overlay hidden">
-  <div class="post-overlay-content">
-    <button id="closeOverlayBtn" class="close-overlay">&times;</button>
-
-    <!-- Bài viết -->
-    <div id="overlayPostContent" class="overlay-post-content">
-      <!-- Nội dung bài post sẽ được JS thêm vào -->
+  <div class="post-overlay-box">
+    <!-- Tiêu đề -->
+    <div class="overlay-header">
+      <h3 id="overlayAuthorName">Bài viết của Nguyen Dui</h3>
+      <button id="closeOverlayBtn" class="close-overlay">&times;</button>
     </div>
 
-    <!-- Bình luận -->
-    <div class="overlay-comments">
-      <div class="comment-list" id="commentList">
-        <div class="comment-item">
-          <img src="../assets/default-avatar.png" class="avatar-sm" alt="user" />
-          <div class="comment-content">
-            <p><strong>Trần Đức</strong> Tuyệt vời quá! ❤️</p>
+    <!-- Nội dung -->
+    <div class="post-overlay-content">
+      <div id="overlayPostContent" class="overlay-post-content">
+        <!-- Nội dung bài post sẽ được JS thêm vào -->
+      </div>
+
+      <!-- Bình luận -->
+      <div class="overlay-comments">
+        <div class="comment-list" id="commentList">
+          <div class="comment-item">
+            <img src="/assets/default-avatar.png" class="avatar-comment" alt="user" />
+            <div class="comment-content">
+              <p><strong>Trần Đức</strong> Tuyệt vời quá! ❤️</p>
+            </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="comment-form">
-        <input type="text" placeholder="Viết bình luận..." id="overlayCommentInput" />
-        <button id="overlaySendBtn">Gửi</button>
-      </div>
+    <!-- Form bình luận -->
+    <div class="comment-form">
+      <input type="text" placeholder="Viết bình luận..." id="overlayCommentInput" />
+      <button id="overlaySendBtn" class="send-btn">
+        <img src="/assets/send-comment.png" alt="Gửi" class="send-icon" />
+      </button>
+
     </div>
   </div>
 </div>
+
+
 
 
 <script src="../js/event-wall.js"></script>
