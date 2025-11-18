@@ -1,0 +1,580 @@
+/*
+ * ===========================================
+ * CSS cho Trang Quản lý (Manager)
+ * Đã được nâng cấp để tăng tính đồng nhất và responsive.
+ * ===========================================
+ */
+
+/* * --- Biến màu và Kiểu dáng Chung ---
+ */
+:root {
+  --primary-color: #007bff;
+  --danger-color: #dc3545;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --light-bg: #f8f9fa;
+  --border-color: #dee2e6;
+  --text-color: #333;
+  --text-color-muted: #555;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --border-radius: 8px;
+}
+
+/* [NÂNG CẤP] 1. Áp dụng box-sizing toàn cục.
+ * Giúp việc tính toán padding và border dễ dàng hơn.
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* * --- Kiểu dáng Container Chính ---
+ */
+.manager-container {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+/* * --- Tiêu đề trang ---
+ */
+.page-header {
+  display: flex;
+  flex-wrap: wrap; /* [NÂNG CẤP] Thêm wrap cho an toàn */
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem; /* [NÂNG CẤP] Thêm gap thay cho margin */
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: var(--text-color);
+}
+
+/* * --- Kiểu dáng Nút (Button) Chung ---
+ */
+.btn {
+  padding: 0.75rem 1.25rem;
+  border: 1px solid transparent; /* [NÂNG CẤP] Thêm border để outline không bị giật */
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5; /* [NÂNG CẤP] Đảm bảo chiều cao chữ */
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  color: #fff; /* Màu chữ mặc định là trắng */
+}
+
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+.btn-danger {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+.btn-secondary {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+.btn-success {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+/* [NÂNG CẤP] 2. Thêm một kiểu nút phổ biến (outline).
+ * Rất hữu ích cho các nút "Hủy" hoặc "Xem chi tiết".
+ */
+.btn-outline-secondary {
+  background-color: #fff;
+  border-color: var(--border-color);
+  color: var(--text-color-muted);
+}
+.btn-outline-secondary:hover {
+  background-color: var(--light-bg);
+  border-color: var(--secondary-color);
+  color: var(--text-color);
+}
+
+/* Nút nhỏ, dùng trong bảng */
+.btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  gap: 0.35rem;
+}
+
+/* * --- Danh sách Sự kiện của Manager ---
+ */
+#my-events-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.manager-event-item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem; /* [NÂNG CẤP] Dùng gap thay cho flex-basis */
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: #fff;
+  transition: box-shadow 0.2s ease;
+}
+
+.manager-event-item:hover {
+  box-shadow: var(--shadow);
+}
+
+.event-info {
+  flex: 1 1 50%; /* [NÂNG CẤP] Linh hoạt hơn */
+  min-width: 300px;
+}
+
+.event-info h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  color: var(--primary-color);
+}
+
+.event-info p {
+  margin: 0.3rem 0;
+  color: var(--text-color-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.event-info p i {
+  width: 16px;
+  text-align: center;
+}
+
+.event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  flex: 1 1 30%; /* [NÂNG CẤP] Linh hoạt hơn */
+  justify-content: flex-end;
+  min-width: 250px;
+}
+
+/* * --- Trạng thái (Status Badge) ---
+ */
+.status {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  color: #fff;
+  text-transform: uppercase;
+  white-space: nowrap; /* Tránh bị vỡ chữ */
+}
+.status-pending {
+  background-color: var(--warning-color);
+  color: #333;
+}
+.status-approved {
+  background-color: var(--success-color);
+}
+.status-rejected {
+  background-color: var(--danger-color);
+}
+.status-completed {
+  background-color: var(--secondary-color);
+}
+
+/* * ===========================================
+ * Kiểu dáng Modal Chung (Quan trọng)
+ * ===========================================
+ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0; /* [NÂNG CẤP] Tương đương top/left/right/bottom = 0 */
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  padding: 1rem;
+}
+
+.modal-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  transform: scale(1);
+  transition: transform 0.3s ease;
+  
+  /* [NÂNG CẤP] 3. Áp dụng cho TẤT CẢ modal, không chỉ form.
+   * Đảm bảo modal cao không bị tràn màn hình.
+   */
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-overlay.hidden .modal-content {
+  transform: scale(0.95); /* [NÂNG CẤP] Giảm hiệu ứng scale một chút */
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  line-height: 1; /* Căn giữa icon */
+}
+
+.modal-close:hover {
+  color: #333;
+}
+
+/* * --- Kiểu dáng riêng cho Modal Xác nhận Xóa ---
+ */
+#deleteConfirmModal h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+#deleteConfirmModal p {
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+  color: #444;
+  line-height: 1.6;
+}
+
+.modal-footer {
+  display: flex;
+  flex-wrap: wrap; /* [NÂNG CẤP] Thêm wrap */
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+/* * ===========================================
+ * Kiểu dáng Form (Trong Modal)
+ * ===========================================
+ */
+
+.form-container.modal-content {
+  max-width: 700px;
+  /* Không cần max-height và overflow-y ở đây nữa, vì đã chuyển lên .modal-content */
+}
+
+#form-title {
+  margin-top: 0;
+  margin-bottom: 2rem;
+  font-size: 1.75rem;
+  color: var(--text-color);
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.form-group .required {
+  color: var(--danger-color);
+  margin-left: 0.25rem;
+  font-weight: 700;
+}
+
+/* Kiểu dáng chung cho các input, textarea, select */
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  color: var(--text-color);
+  background-color: #fff; /* [NÂNG CẤP] Đảm bảo nền trắng */
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+  /* box-sizing: border-box; đã được áp dụng toàn cục */
+}
+
+.form-group select {
+  cursor: pointer; /* Thêm con trỏ */
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Hiệu ứng focus cho input */
+.form-group input[type="text"]:focus,
+.form-group input[type="date"]:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* Placeholder style */
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #adb5bd;
+  opacity: 1;
+}
+
+/* Layout hàng cho ngày bắt đầu/kết thúc */
+.form-group-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-group-row .form-group {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 0;
+}
+
+/* [NÂNG CẤP] 4. Đồng nhất cách ẩn/hiện lỗi.
+ * Thay vì `display: none` trên ID, dùng class `.hidden`
+ * (giống như cách bạn làm với modal) để JS bật/tắt.
+ */
+.form-error-message {
+  color: var(--danger-color);
+  background-color: rgba(220, 53, 69, 0.05);
+  border: 1px solid rgba(220, 53, 69, 0.1);
+  padding: 0.75rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 600;
+}
+/* Bạn có thể thêm class .hidden (giống modal) vào #form-error
+   và dùng JS để .classList.remove('hidden') / .classList.add('hidden')
+   Hoặc giữ nguyên cách cũ (JS thay đổi style.display) đều được. 
+   Code gốc của bạn dùng display:none, tôi giữ lại cho đỡ lỗi JS. */
+#form-error {
+   display: none; 
+}
+
+
+/* * ===========================================
+ * Kiểu dáng Bảng (Table)
+ * ===========================================
+ */
+.table-container {
+  width: 100%;
+  overflow-x: auto; /* Quan trọng: Cho phép cuộn ngang */
+  background-color: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-top: 1.5rem;
+}
+
+.registration-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.registration-table th,
+.registration-table td {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+  /* [NÂNG CẤP] 5. Ngăn text bị vỡ khi bảng quá hẹp.
+   * Buộc bảng phải cuộn thay vì làm hỏng chữ.
+   */
+  white-space: nowrap;
+}
+
+.registration-table th {
+  background-color: var(--light-bg);
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.registration-table tr:last-child td {
+  border-bottom: none;
+}
+
+.registration-table tr:hover {
+  background-color: #fcfcfc;
+}
+
+.actions-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  /* [NÂNG CẤP] Cho phép chữ trong cell này được xuống dòng */
+  white-space: normal;
+}
+
+.actions-cell span {
+  font-size: 0.9rem;
+  color: var(--secondary-color);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.registration-table .error {
+  color: var(--danger-color);
+  font-weight: 600;
+  text-align: center;
+}
+
+/* * ===========================================
+ * Kiểu dáng Xem trước Ảnh (Image Preview)
+ * ===========================================
+ */
+
+/* [NÂNG CẤP] 6. Đã xóa code .image-preview-area bị trùng lặp ở cuối file. */
+.image-preview-area {
+  width: 100%;
+  max-height: 200px;
+  border: 2px dashed #ccc;
+  border-radius: var(--border-radius); /* [NÂNG CẤP] Dùng biến chung */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: #f9f9f9;
+  color: #888;
+}
+
+.image-preview-area img {
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* * ===========================================
+ * Responsive (Điểm ngắt di động)
+ * ===========================================
+ */
+
+@media (max-width: 768px) {
+  .manager-container {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  /* [NÂNG CẤP] Giảm cỡ chữ tiêu đề trên di động */
+  .page-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  /* Cho các item sự kiện xếp chồng lên nhau */
+  .manager-event-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .event-info,
+  .event-actions {
+    flex-basis: 100%;
+    min-width: 100%; /* [NÂNG CẤP] Đảm bảo 100% */
+  }
+
+  .event-actions {
+    justify-content: flex-start;
+  }
+
+  /* Cho các input ngày xếp chồng lên nhau */
+  .form-group-row {
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .form-group-row .form-group {
+    min-width: 100%;
+  }
+
+  .modal-content {
+    padding: 1.5rem;
+    margin: 0; /* [NÂNG CẤP] Cho modal chiếm 100% (do padding 1rem của overlay) */
+    max-height: 95vh;
+  }
+
+  #form-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Nút trong footer modal xếp chồng */
+  .modal-footer {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .modal-footer .btn {
+    width: 100%; /* Nút chiếm 100% chiều rộng */
+  }
+
+  /* [NÂNG CẤP] Cho phép cell trong bảng cuộn dễ hơn */
+  .registration-table th,
+  .registration-table td {
+    padding: 0.75rem 1rem;
+  }
+}
