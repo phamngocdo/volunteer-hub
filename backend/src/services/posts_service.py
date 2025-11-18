@@ -10,10 +10,6 @@ from fastapi import HTTPException
 import traceback
 
 class PostService:
-    from sqlalchemy import select, func
-from src.models import Post, User, React, Comment
-
-class PostService:
     @staticmethod
     async def get_all_posts(db: Session, current_user_id: int):
         """
@@ -91,16 +87,82 @@ class PostService:
             raise
 
     @staticmethod
-    async def get_posts_by_event(db: Session, event_id: int):
+    async def get_posts_by_event(db: Session, event_id: int, current_user_id: int):
         """
-        Tìm và trả về các bài post theo ID.
+        Lấy tất cả bài post thuộc 1 sự kiện cụ thể (theo event_id), kèm:
+        - Tên người đăng
+        - Số lượng react
+        - React của user hiện tại
+        - Số lượng comment
         """
         try:
-            query = select(Post).where(Post.event_id == event_id)
-            return db.execute(query).scalars().all()
-        except Exception as e:
+            # --- Subquery: Đếm số react theo post_id ---
+            react_subquery = (
+                select(
+                    React.post_id,
+                    func.count(React.like_id).label("react_count")
+                )
+                .group_by(React.post_id)
+                .subquery()
+            )
+
+            # --- Subquery: Đếm số comment theo post_id ---
+            comment_subquery = (
+                select(
+                    Comment.post_id,
+                    func.count(Comment.comment_id).label("comment_count")
+                )
+                .group_by(Comment.post_id)
+                .subquery()
+            )
+
+            # --- Truy vấn chính ---
+            post_query = (
+                select(
+                    Post,
+                    User.first_name,
+                    User.last_name,
+                    func.coalesce(react_subquery.c.react_count, 0).label("react_count"),
+                    func.coalesce(comment_subquery.c.comment_count, 0).label("comment_count")
+                )
+                .join(User, User.user_id == Post.user_id)
+                .outerjoin(react_subquery, react_subquery.c.post_id == Post.post_id)
+                .outerjoin(comment_subquery, comment_subquery.c.post_id == Post.post_id)
+                .where(Post.event_id == event_id)
+                .order_by(Post.created_at.desc())
+            )
+
+            posts_result = db.execute(post_query).all()
+
+            # --- Lấy react của user hiện tại ---
+            user_reacts_query = select(React.post_id, React.category).where(React.user_id == current_user_id)
+            user_reacts_result = db.execute(user_reacts_query).all()
+            user_reacts = {pid: cat for pid, cat in user_reacts_result}
+
+            # --- Gộp dữ liệu ---
+            posts_data = []
+            for post, first_name, last_name, react_count, comment_count in posts_result:
+                posts_data.append({
+                    "post_id": post.post_id,
+                    "content": post.content,
+                    "images_url": post.images_url,
+                    "event_id": post.event_id,
+                    "user_id": post.user_id,
+                    "created_at": post.created_at,
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "react_count": react_count,
+                    "comment_count": comment_count,
+                    "user_react": user_reacts.get(post.post_id)  # react của user hiện tại
+                })
+
+            return posts_data
+
+        except Exception:
+            import traceback
             traceback.print_exc()
             raise
+
         
     @staticmethod
     async def create_post(db: Session, event_id: int, user_id: int, post):
@@ -144,4 +206,81 @@ class PostService:
         except Exception as e:
             traceback.print_exc()
             db.rollback()
+            raise
+
+    @staticmethod
+    async def get_posts_by_user(db: Session, target_user_id: int, current_user_id: int):
+        """
+        Lấy tất cả bài post của 1 user cụ thể (target_user_id), kèm:
+        - Tên người đăng
+        - Số lượng react
+        - React của user hiện tại
+        - Số lượng comment
+        """
+        try:
+            # --- Subquery: Đếm số react theo post_id ---
+            react_subquery = (
+                select(
+                    React.post_id,
+                    func.count(React.like_id).label("react_count")
+                )
+                .group_by(React.post_id)
+                .subquery()
+            )
+
+            # --- Subquery: Đếm số comment theo post_id ---
+            comment_subquery = (
+                select(
+                    Comment.post_id,
+                    func.count(Comment.comment_id).label("comment_count")
+                )
+                .group_by(Comment.post_id)
+                .subquery()
+            )
+
+            # --- Truy vấn chính ---
+            post_query = (
+                select(
+                    Post,
+                    User.first_name,
+                    User.last_name,
+                    func.coalesce(react_subquery.c.react_count, 0).label("react_count"),
+                    func.coalesce(comment_subquery.c.comment_count, 0).label("comment_count")
+                )
+                .join(User, User.user_id == Post.user_id)
+                .outerjoin(react_subquery, react_subquery.c.post_id == Post.post_id)
+                .outerjoin(comment_subquery, comment_subquery.c.post_id == Post.post_id)
+                .where(Post.user_id == target_user_id)
+                .order_by(Post.created_at.desc())
+            )
+
+            posts_result = db.execute(post_query).all()
+
+            # --- Lấy react của user hiện tại ---
+            user_reacts_query = select(React.post_id, React.category).where(React.user_id == current_user_id)
+            user_reacts_result = db.execute(user_reacts_query).all()
+            user_reacts = {pid: cat for pid, cat in user_reacts_result}
+
+            # --- Gộp dữ liệu ---
+            posts_data = []
+            for post, first_name, last_name, react_count, comment_count in posts_result:
+                posts_data.append({
+                    "post_id": post.post_id,
+                    "content": post.content,
+                    "images_url": post.images_url,
+                    "event_id": post.event_id,
+                    "user_id": post.user_id,
+                    "created_at": post.created_at,
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "react_count": react_count,
+                    "comment_count": comment_count,
+                    "user_react": user_reacts.get(post.post_id)  # react của user hiện tại
+                })
+
+            return posts_data
+
+        except Exception:
+            import traceback
+            traceback.print_exc()
             raise

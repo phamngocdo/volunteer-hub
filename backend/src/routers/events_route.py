@@ -40,6 +40,35 @@ async def get_all_events(
     events = await EventService.get_public_events(db, category=category, start_date=start_date, status=status)
     return events
 
+@events_router.get("/joined", response_model=List[JoinedEventDetail])
+async def get_joined_events(request: Request, db: Session = Depends(get_db)):
+    """
+    Lấy tất cả sự kiện đã tham gia (volunteer) hoặc đang quản lý (manager)
+    """
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    token = auth_header.split(" ")[1]
+    session_json = await r.get(token)
+    if not session_json:
+        raise HTTPException(status_code=401, detail="Session expired or invalid")
+
+    try:
+        user = await UserService.get_current_user(token=token, db=db)
+        role = user.get("role")
+        if role == "admin":
+            raise HTTPException(status_code=403, detail="Admin not authorized")
+        if user.get("status") == "banned":
+            raise HTTPException(status_code=403, detail="Your account has been banned")
+
+        user_id = user.get("user_id")
+        return EventService.get_joined_events(db, user_id, role)
+
+    except (ExpiredSignatureError, InvalidTokenError) as e:
+        raise HTTPException(status_code=401, detail=f"Unauthorized: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
 
 @events_router.get("/{event_id}", response_model=EventDetail)
 async def get_event_details(event_id: int, db: Session = Depends(get_db)):

@@ -50,3 +50,14 @@ class RegistrationDetail(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# trả về thông tin của một event đã tham gia
+class JoinedEventDetail(BaseModel):
+    event_id: int
+    title: str
+    image_url: Optional[str] = None
+    member_count: int
+
+    class Config:
+        from_attributes = True

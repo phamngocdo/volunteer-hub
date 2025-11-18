@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Depends, HTTPException, status
+from fastapi import APIRouter, Request, Depends, HTTPException, status, File, UploadFile
 from sqlalchemy.orm import Session
 from jwt import InvalidTokenError, ExpiredSignatureError
 
@@ -9,6 +9,7 @@ from src.services.posts_service import PostService
 from src.services.users_service import UserService
 from src.schemas.posts_schemas import *
 from src.config.redis_config import redis_client as r
+from src.config.cloudinary_config import cloudinary
 
 posts_router = APIRouter()
 
@@ -55,8 +56,8 @@ async def get_all_posts(request: Request, db: Session = Depends(get_db)):
 
 
 
-# trả về danh sách các đối tượng postdetail
-@posts_router.get("/events/{event_id}/", response_model=List[PostDetail])
+# trả về danh sách các đối tượng postalldetail
+@posts_router.get("/events/{event_id}/", response_model=List[PostAllDetail])
 async def get_posts_by_event(request: Request, event_id: int, db: Session = Depends(get_db)):
     """
     Lấy tất cả bài post của 1 sự kiện.
@@ -78,7 +79,8 @@ async def get_posts_by_event(request: Request, event_id: int, db: Session = Depe
         if user.get("status") == "banned":
             raise HTTPException(status_code=403, detail="Your account has been banned")
 
-        posts = await PostService.get_posts_by_event(db, event_id)
+        user_id = user.get("user_id")
+        posts = await PostService.get_posts_by_event(db, event_id, user_id)
         return posts
 
     except (ExpiredSignatureError, InvalidTokenError) as e:
@@ -162,4 +164,46 @@ async def delete_post(request: Request, post_id: int, db: Session = Depends(get_
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+    
 
+@posts_router.post("/upload-image")
+async def upload_image(file: UploadFile = File(...)):
+    try:
+        result = cloudinary.uploader.upload(file.file)
+        return {"images_url": result["secure_url"]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lỗi upload ảnh: {e}")
+
+# trả về danh sách các đối tượng PostAllDetail
+@posts_router.get("/users/me/", response_model=List[PostAllDetail])
+async def get_posts_by_user(request: Request, db: Session = Depends(get_db)):
+    """
+    Lấy tất cả bài post của user hiện tại dựa trên token.
+    """
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    token = auth_header.split(" ")[1]
+
+    session_json = await r.get(token)
+    if not session_json:
+        raise HTTPException(status_code=401, detail="Session expired or invalid")
+
+    try:
+        user = await UserService.get_current_user(token=token, db=db)
+        if user.get("role") == "admin":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin not authorized")
+        if user.get("status") == "banned":
+            raise HTTPException(status_code=403, detail="Your account has been banned")
+
+        current_user_id = user.get("user_id")
+
+        posts = await PostService.get_posts_by_user(db, current_user_id, current_user_id)
+        return posts
+
+    except (ExpiredSignatureError, InvalidTokenError) as e:
+        raise HTTPException(status_code=401, detail=f"Unauthorized: {e}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")

@@ -32,5 +32,5 @@ class PostAllDetail(BaseModel):
     user_react: Optional[str] = None  # Có thể là "like", "love", v.v.
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 

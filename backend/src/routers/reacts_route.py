@@ -65,8 +65,8 @@ async def delete_react(request: Request, post_id: int, db: Session = Depends(get
         if user.get("status") == "banned":
             raise HTTPException(status_code=403, detail="Your account has been banned")
         user_id = user.get("user_id")
-        await ReactService.delete_react(db, post_id, user_id)
-        return {"detail": "React removed successfully"}
+        result = await ReactService.delete_react(db, post_id, user_id)
+        return result
     except (ExpiredSignatureError, InvalidTokenError) as e:
         raise HTTPException(status_code=401, detail=f"Unauthorized: {e}")
     except HTTPException:
