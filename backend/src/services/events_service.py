@@ -136,6 +136,32 @@ class EventService:
             traceback.print_exc()
             db.rollback()
             raise
+    
+    @staticmethod
+    async def get_events_by_manager(db: Session, manager_id: int) -> List[dict]:
+        """
+        Lấy danh sách các sự kiện được tạo bởi một manager cụ thể.
+        """
+        try:
+            # Lấy tất cả sự kiện của manager, sắp xếp theo ngày tạo hoặc ngày bắt đầu mới nhất
+            query = select(Event).where(Event.manager_id == manager_id).order_by(Event.start_date.desc())
+            
+            result = db.execute(query)
+            events = result.scalars().all()
+
+            # Xử lý data để map với schema EventSimple (cần thêm field volunteer_number)
+            events_with_volunteer_number = []
+            for e in events:
+                e_dict = e.__dict__.copy() 
+                # Đếm số lượng registrations (dựa trên relationship trong model)
+                e_dict["volunteer_number"] = len(e.registrations) if e.registrations else 0
+                events_with_volunteer_number.append(e_dict)
+
+            return events_with_volunteer_number
+
+        except Exception as e:
+            traceback.print_exc()
+            raise
 
 class RegistrationService:
     @staticmethod
