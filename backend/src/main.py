@@ -16,8 +16,10 @@ from src.routers.comments_route import comments_router
 from src.routers.reacts_route import reacts_router
 from src.routers.notifications_route import notifications_router
 from src.routers.admin_route import admin_router
+from fastapi.staticfiles import StaticFiles
 
 SRC_DIR = Path(__file__).resolve().parent
+ROOT_DIR = SRC_DIR.parent.parent
 
 load_dotenv()
 
@@ -25,6 +27,8 @@ backend_port = int(os.getenv("BACKEND_PORT", 8000))
 frontend_port = int(os.getenv("FRONTEND_PORT", 3000))
 
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory=ROOT_DIR / "frontend"), name="static")
 
 app.add_middleware(
     CORSMiddleware,

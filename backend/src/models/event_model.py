@@ -25,3 +25,13 @@ class Event(Base):
     registrations = relationship("EventRegistration", back_populates="event")
     posts = relationship("Post", back_populates="event")
     notifications = relationship("Notification", back_populates="event")
+
+    @property
+    def volunteer_number(self):
+        """
+        Tự động đếm số lượng trong danh sách 'registrations' 
+        để trả về giá trị cho trường volunteer_number trong Pydantic schema.
+        """
+        if self.registrations:
+            return len(self.registrations)
+        return 0

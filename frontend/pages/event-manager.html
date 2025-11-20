@@ -1,0 +1,126 @@
+<link rel="stylesheet" href="../css/manager.css" />
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
+
+<div class="manager-container">
+
+  <div class="page-header">
+
+    <h1>Sự kiện của tôi</h1>
+
+    <button id="openCreateEventBtn" class="btn btn-primary">
+
+      <i class="fa-solid fa-plus"></i> Tạo sự kiện mới
+
+    </button>
+
+  </div>
+
+
+
+  <div id="my-events-list">
+
+    <p>Đang tải sự kiện của bạn...</p>
+
+  </div>
+
+</div>
+
+
+
+<div id="deleteConfirmModal" class="modal-overlay hidden" style="display: none">
+
+  <div class="modal-content">
+
+    <button class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+
+    <h3>Xác nhận xóa</h3>
+
+    <p id="deleteConfirmMessage"></p>
+
+    <div class="modal-footer">
+
+      <button id="cancelDeleteBtn" class="btn btn-secondary">Hủy</button>
+
+      <button id="confirmDeleteBtn" class="btn btn-danger">Xóa</button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<div id="createEventModal" class="modal-overlay hidden" style="display: none">
+  <div class="modal-content form-container">
+    <button class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+
+    <h3 id="form-title">Tạo sự kiện mới</h3>
+
+    <form id="create-event-form">
+      <div class="form-group">
+        <label for="title">Tên sự kiện <span class="required">*</span></label>
+        <input type="text" id="title" name="title" required />
+      </div>
+
+      <div class="form-group">
+        <label for="description">Mô tả</label>
+        <textarea id="description" name="description" rows="4"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="location">Địa điểm</label>
+        <input type="text" id="location" name="location" />
+      </div>
+
+      <div class="form-group">
+        <label>Ảnh bìa</label>
+        
+        <input type="hidden" id="image_url" name="image_url" />
+
+        <input type="file" id="image_file_input" accept="image/*" style="display: none;" />
+
+        <div class="image-upload-container" style="border: 1px dashed #ccc; padding: 15px; text-align: center; border-radius: 5px;">
+            <div id="image-preview" style="margin-bottom: 10px; min-height: 120px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
+                <p style="color: #888; margin: 0;">Chưa chọn ảnh nào</p>
+            </div>
+            
+            <button type="button" id="open-file-picker-btn" class="btn btn-secondary" style="margin-bottom: 5px;">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Chọn ảnh từ máy
+            </button>
+            
+            <p id="upload-status" style="font-size: 0.85rem; color: #666; margin: 0; height: 20px;"></p>
+        </div>
+      </div>
+      <div class="form-group-row">
+        <div class="form-group">
+          <label for="start_date">Ngày bắt đầu <span class="required">*</span></label>
+          <input type="date" id="start_date" name="start_date" required />
+        </div>
+        <div class="form-group">
+          <label for="end_date">Ngày kết thúc <span class="required">*</span></label>
+          <input type="date" id="end_date" name="end_date" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="category">Thể loại</label>
+        <select id="category" name="category">
+          <option value="Môi trường">Môi trường</option>
+          <option value="Từ thiện">Từ thiện</option>
+          <option value="Giáo dục">Giáo dục</option>
+        </select>
+      </div>
+
+      <p id="form-error" class="error-message general-error"></p>
+
+      <div class="modal-footer">
+        <button type="button" id="cancelCreateBtn" class="btn btn-secondary">Hủy</button>
+        <button type="submit" id="saveEventBtn" class="btn btn-primary">Tạo sự kiện</button>
+      </div>
+    </form>
+  </div>
+</div>

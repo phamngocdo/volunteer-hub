@@ -1,5 +1,3 @@
-import { initPush } from './web-push.js';
-
 async function loadComponent(id, path) {
   const container = document.getElementById(id);
   const res = await fetch(path);
@@ -7,9 +5,9 @@ async function loadComponent(id, path) {
 }
 
 await loadComponent("header-container", "./components/header.html");
-initHeader();
+await initHeader();
 
-export function initHeader() {
+export async function initHeader() {
   const toggle = document.getElementById("menu-toggle");
   const nav = document.getElementById("main-nav");
   const overlay = document.getElementById("overlay");
@@ -71,17 +69,19 @@ export function initHeader() {
     }
   });
 
-  loadUserHeader();
+  await loadUserHeader();
 
-  function loadUserHeader() {
+  async function loadUserHeader() {
     try {
-      const user = getTokenPayload();
-      if (!user) {
-        renderGuestActions();
-        renderMenu("guest");
-        return;
-      }
-      const role = user.role;
+      const token = localStorage.getItem("access_token");
+      const token_type = localStorage.getItem("token_type");
+      const res = await fetch("http://localhost:8000/api/users/me", {
+        headers: { "Authorization": `${token_type} ${token}` }
+      });
+      if (res.status === 401) { renderGuestActions(); renderMenu("guest"); return; }
+      if (!res.ok) throw new Error(`Unexpected status: ${res.status}`);
+      const user = await res.json();
+      const role = user.role || "guest";
       renderMenu(role);
       renderUserActions(role, user);
     } catch {
@@ -105,72 +105,14 @@ export function initHeader() {
   }
 
   function renderGuestActions() {
-
     const html = `<a href="/login" class="btn btn-ghost">Đăng nhập</a>
                   <a href="/register" class="btn btn-primary">Đăng ký</a>`;
     actions.innerHTML = html;
     mobileActions.innerHTML = html;
   }
 
-  async function setupNotifications() {
-    const token = localStorage.getItem("access_token");
-    const token_type = localStorage.getItem("token_type");
-    const headers = { "Authorization": `${token_type} ${token}` };
-
-    const btn = document.querySelector(".notification-btn");
-    const countSpan = document.querySelector(".notification-count");
-    const dropdown = document.createElement("div");
-
-    dropdown.className = "notification-dropdown hidden";
-    btn.parentNode.insertBefore(dropdown, btn.nextSibling);
-
-    const res = await fetch("http://localhost:8000/api/notifications/", { headers });
-    if (!res.ok) return;
-    const notifications = await res.json();
-
-    const unread = notifications.filter(n => n.is_read === false).length;
-
-    if (unread > 0) countSpan.textContent = unread;
-    else countSpan.style.display = "none";
-
-    dropdown.innerHTML = notifications.length === 0
-      ? "<div class='ntf-empty'>Không có thông báo</div>"
-      : notifications.map(n => `
-        <div class="ntf-item ${n.is_read ? "read" : "unread"}">
-          <div class="ntf-message">${n.message}</div>
-          <div class="ntf-time">${new Date(n.created_at).toLocaleString()}</div>
-        </div>
-      `).join("");
-
-    btn.addEventListener("click", async (ev) => {
-      ev.stopPropagation();
-      dropdown.classList.toggle("hidden");
-
-      if (!dropdown.classList.contains("hidden") && unread > 0) {
-        const patchRes = await fetch("http://localhost:8000/api/notifications/", {
-          method: "PATCH",
-          headers
-        });
-
-        if (patchRes.ok) {
-          countSpan.style.display = "none";
-          dropdown.querySelectorAll(".ntf-item").forEach(e => e.classList.add("read"));
-        }
-      }
-    });
-
-    document.addEventListener("click", () => {
-      dropdown.classList.add("hidden");
-    });
-
-    dropdown.addEventListener("click", ev => ev.stopPropagation());
-  }
-
-
   function renderUserActions(role, user) {
-    initPush();
-
-    const avatarUrl = user.avatar_url ? avatar_url : "../assets/default-avatar.png";
+    const avatarUrl = "../assets/default-avatar.png";
     const html = `
       <button class="notification-btn" aria-label="Thông báo"><i class="fa-solid fa-bell"></i><span class="notification-count">3</span></button>
       <div class="user-avatar user-menu-toggle"><img src="${avatarUrl}" alt="Avatar"></div>
@@ -181,27 +123,23 @@ export function initHeader() {
       </div>
     `;
     userArea.innerHTML = html;
-    setupNotifications();
 
     const logoutBtn = userArea.querySelector(".logout-btn");
     if (logoutBtn) logoutBtn.addEventListener("click", async () => {
       try {
         const token = localStorage.getItem("access_token");
         const token_type = localStorage.getItem("token_type");
-
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("token_type");
+        localStorage.removeItem("role");
+        localStorage.removeItem("status");
         const res = await fetch("http://localhost:8000/auth/logout", {
           method: "POST",
           credentials: "include",
           headers: { "Authorization": `${token_type} ${token}` }
 
         });
-        if (res.ok) {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("token_type");
-          localStorage.removeItem("role");
-          localStorage.removeItem("status");
-          location.href = "/login";
-        }
+        if (res.ok) location.href = "/login";
         else alert("Đăng xuất thất bại");
       } catch {
         alert("Lỗi kết nối");
@@ -218,39 +156,50 @@ await loadComponent("footer-container", "./components/footer.html");
 
 const main = document.getElementById("main-content");
 
-export function getTokenPayload() {
-  try {
-    const token = localStorage.getItem("access_token");
-    const payload = token.split(".")[1];
-    const decoded = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
-    return JSON.parse(decoded);
-  } catch (e) {
-    return null;
-  }
-}
-
-export async function navigateTo(page) {
-  const status = getTokenPayload()?.status;
+export async function navigateTo(fullPath) {
+  console.log(`[Navigation] Navigating to: ${fullPath}`);
+  const status = localStorage.getItem("status");
   if (status === "banned") {
     const res = await fetch(`./pages/banned.html`);
     const html = await res.text();
     main.innerHTML = html;
-    window.history.pushState({}, "", `/${page}`);
+    window.history.pushState({}, "", `/${fullPath}`);
     return;
   }
-  const res = await fetch(`./pages/${page}.html`);
-  const html = await res.text();
-  main.innerHTML = html;
-  window.history.pushState({}, "", `/${page}`);
 
-  document.querySelectorAll(`script[data-page]`).forEach(s => s.remove());
+  // Handle dynamic routes (e.g., event-user/123 -> template: event-user)
+  let templateName = fullPath;
+  if (fullPath.startsWith("event-user/")) {
+    templateName = "event-user";
+  }
 
-  const script = document.createElement("script");
-  script.src = `./js/${page}.js?cacheBust=${Date.now()}`;
-  script.type = "module";
-  script.dataset.page = page;
-  document.body.appendChild(script);
+  try {
+    console.log(`[Navigation] Fetching template: /pages/${templateName}.html`);
+    const res = await fetch(`/pages/${templateName}.html`);
+    if (!res.ok) throw new Error(`Page not found: ${res.status}`);
+
+    const html = await res.text();
+    console.log(`[Navigation] Template fetched. Length: ${html.length}`);
+    main.innerHTML = html;
+    window.history.pushState({}, "", `/${fullPath}`);
+
+    console.log(`[Navigation] Removing old scripts...`);
+    document.querySelectorAll(`script[data-page]`).forEach(s => s.remove());
+
+    console.log(`[Navigation] Injecting script: /js/${templateName}.js`);
+    const script = document.createElement("script");
+    script.src = `/js/${templateName}.js?cacheBust=${Date.now()}`;
+    script.type = "module";
+    script.dataset.page = templateName;
+    script.onload = () => console.log(`[Navigation] Script loaded: ${templateName}`);
+    script.onerror = (e) => console.error(`[Navigation] Script error: ${templateName}`, e);
+    document.body.appendChild(script);
+  } catch (err) {
+    console.error("Navigation error:", err);
+    main.innerHTML = `<h1>Error loading page</h1><p>${err.message}</p>`;
+  }
 }
+
 
 document.body.addEventListener("click", (e) => {
   const link = e.target.closest("a");

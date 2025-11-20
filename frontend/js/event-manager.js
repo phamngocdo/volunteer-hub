@@ -6,7 +6,6 @@ const token_type = localStorage.getItem("token_type") || "Bearer";
 console.log("🕵️‍♂️ DEBUG: Token đã được tải.");
 
 // === DOM Elements Chung ===
-// === DOM Elements Chung ===
 let mainContainer;
 let deleteModal;
 let closeDeleteBtn;
@@ -437,27 +436,34 @@ function formatDate(dateStr) {
 // === Khởi tạo trang ===
 function initEventManagerPage() {
 
-
-
   // ✅ BƯỚC 1: GÁN GIÁ TRỊ (QUERY DOM) KHI HÀM CHẠY
   // Lỗi "TypeError" và "ReferenceError" của bạn sẽ được sửa ở đây
   mainContainer = document.querySelector(".manager-container");
 
   // Modal Xóa
   deleteModal = document.getElementById("deleteConfirmModal");
-  closeDeleteBtn = deleteModal.querySelector(".modal-close-delete"); // Lỗi TypeError có thể ở đây
+  if (!deleteModal) {
+    console.error("❌ Error: deleteConfirmModal not found in DOM");
+    console.log("Current DOM body:", document.body.innerHTML);
+    throw new Error("Không tìm thấy modal xóa (deleteConfirmModal)");
+  }
+  closeDeleteBtn = deleteModal.querySelector(".modal-close");
   cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
   confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
-  
+
   // Modal Tạo/Sửa
   createModal = document.getElementById("createEventModal");
+  if (!createModal) {
+    console.error("❌ Error: createEventModal not found in DOM");
+    throw new Error("Không tìm thấy modal tạo (createEventModal)");
+  }
   createForm = document.getElementById("create-event-form");
-  closeCreateBtn = createModal.querySelector(".modal-close-create"); // Hoặc ở đây
+  closeCreateBtn = createModal.querySelector(".modal-close");
   cancelCreateBtn = document.getElementById("cancelCreateBtn");
   formError = document.getElementById("form-error");
   formTitle = document.getElementById("form-title");
   saveEventBtn = document.getElementById("saveEventBtn");
-  
+
   // DOM Elements Upload
   imageFileInput = document.getElementById("image_file_input");
   filePickerBtn = document.getElementById("open-file-picker-btn");
@@ -482,7 +488,7 @@ function initEventManagerPage() {
 
   // Gán listener cho UPLOAD
   filePickerBtn.addEventListener("click", () => {
-    imageFileInput.click(); 
+    imageFileInput.click();
   });
   imageFileInput.addEventListener("change", handleFileSelected);
 
@@ -491,4 +497,11 @@ function initEventManagerPage() {
 }
 
 // Chạy hàm khởi tạo khi file được import
-initEventManagerPage();
+try {
+  console.log("🚀 [EventManager] Script initializing...");
+  initEventManagerPage();
+  console.log("✅ [EventManager] Initialization complete.");
+} catch (err) {
+  console.error("❌ [EventManager] Initialization failed:", err);
+  alert(`Lỗi khởi tạo trang quản lý: ${err.message}`);
+}

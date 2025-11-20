@@ -288,3 +288,43 @@ async def update_registration_status(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to manage this registration")
     
     return await RegistrationService.update_status(db, registration_id=registration_id, status=status_update.status)
+
+@events_router.get("/manager/my-events", response_model=List[EventSimple])
+async def get_my_created_events(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy danh sách tất cả sự kiện do Manager hiện tại đã tạo.
+    Yêu cầu: Phải đăng nhập với role 'manager'.
+    """
+    # 1. Lấy token từ Header
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Unauthorized: Missing or invalid token")
+    token = auth_header.split(" ")[1]
+
+    # 2. Kiểm tra session trong Redis
+    session_json = await r.get(token)
+    if not session_json:
+        raise HTTPException(status_code=401, detail="Session expired or invalid")
+
+    # 3. Parse dữ liệu session
+    try:
+        session_data = json.loads(session_json)
+    except TypeError:
+        session_data = session_json # Fallback nếu redis trả về dict sẵn
+
+    # 4. Kiểm tra quyền Manager
+    if session_data.get("role") != "manager":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Access denied. Only managers can view this list."
+        )
+
+    manager_id = session_data.get("user_id")
+
+    # 5. Gọi Service để lấy dữ liệu
+    events = await EventService.get_events_by_manager(db, manager_id=manager_id)
+    
+    return events
