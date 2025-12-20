@@ -71,6 +71,13 @@ export async function fetchMyPosts() {
       const postElement = tempDiv.firstElementChild;
       postElement.dataset.postId = post.post_id;
 
+      const avatarImg = postElement.querySelector(".avatar");
+      if (post.avatar_url) {
+        avatarImg.src = post.avatar_url;
+      } else {
+        avatarImg.src = "/assets/default-avatar.png";
+      }
+
       // Họ tên
       const fullName =
         (post.first_name || "") + (post.last_name ? ` ${post.last_name}` : "");

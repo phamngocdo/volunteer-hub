@@ -16,7 +16,8 @@ class CommentService:
                     Comment.content,
                     Comment.created_at,
                     User.first_name,
-                    User.last_name
+                    User.last_name,
+                    User.avatar_url
                 )
                 .join(User, User.user_id == Comment.user_id)
                 .filter(Comment.post_id == post_id)
@@ -32,6 +33,7 @@ class CommentService:
                     "created_at": c.created_at,
                     "first_name": c.first_name,
                     "last_name": c.last_name,
+                    "avatar_url": c.avatar_url
                 }
                 for c in comments
             ]
@@ -49,7 +51,7 @@ class CommentService:
             db.add(comment)
             db.commit()
             db.refresh(comment)
-            user = db.query(User.first_name, User.last_name).filter(User.user_id == user_id).first()
+            user = db.query(User.first_name, User.last_name, User.avatar_url).filter(User.user_id == user_id).first()
             comment_count = db.query(Comment).filter(Comment.post_id == post_id).count()
 
             return {
@@ -60,6 +62,7 @@ class CommentService:
                 "created_at": comment.created_at,
                 "first_name": user.first_name if user else None,
                 "last_name": user.last_name if user else None,
+                "avatar_url": user.avatar_url if user else None,
                 "comment_count": comment_count
             }
 

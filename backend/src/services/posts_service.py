@@ -44,6 +44,7 @@ class PostService:
                     Post,
                     User.first_name,
                     User.last_name,
+                    User.avatar_url,
                     Event.title.label("event_title"),
                     func.coalesce(react_subquery.c.react_count, 0).label("react_count"),
                     func.coalesce(comment_subquery.c.comment_count, 0).label("comment_count")
@@ -62,7 +63,7 @@ class PostService:
             user_reacts = {pid: cat for pid, cat in user_reacts_result}
 
             posts_data = []
-            for post, first_name, last_name, event_title, react_count, comment_count in posts_result:
+            for post, first_name, last_name, avatar_url, event_title, react_count, comment_count in posts_result:
                 posts_data.append({
                     "post_id": post.post_id,
                     "content": post.content,
@@ -72,6 +73,7 @@ class PostService:
                     "created_at": post.created_at,
                     "first_name": first_name,
                     "last_name": last_name,
+                    "avatar_url": avatar_url,
                     "event_title": event_title,
                     "react_count": react_count,
                     "comment_count": comment_count,
@@ -110,6 +112,7 @@ class PostService:
                     Post,
                     User.first_name,
                     User.last_name,
+                    User.avatar_url,
                     Event.title.label("event_title"),
                     func.coalesce(react_subquery.c.react_count, 0).label("react_count"),
                     func.coalesce(comment_subquery.c.comment_count, 0).label("comment_count")
@@ -129,7 +132,7 @@ class PostService:
             user_reacts = {pid: cat for pid, cat in user_reacts_result}
 
             posts_data = []
-            for post, first_name, last_name, event_title, react_count, comment_count in posts_result:
+            for post, first_name, last_name, avatar_url, event_title, react_count, comment_count in posts_result:
                 posts_data.append({
                     "post_id": post.post_id,
                     "content": post.content,
@@ -139,6 +142,7 @@ class PostService:
                     "created_at": post.created_at,
                     "first_name": first_name,
                     "last_name": last_name,
+                    "avatar_url": avatar_url,
                     "event_title": event_title,
                     "react_count": react_count,
                     "comment_count": comment_count,
@@ -206,6 +210,7 @@ class PostService:
                     Post,
                     User.first_name,
                     User.last_name,
+                    User.avatar_url,
                     Event.title.label("event_title"),
                     func.coalesce(react_subquery.c.react_count, 0).label("react_count"),
                     func.coalesce(comment_subquery.c.comment_count, 0).label("comment_count")
@@ -225,7 +230,7 @@ class PostService:
             user_reacts = {pid: cat for pid, cat in user_reacts_result}
 
             posts_data = []
-            for post, first_name, last_name, event_title, react_count, comment_count in posts_result:
+            for post, first_name, last_name, avatar_url, event_title, react_count, comment_count in posts_result:
                 posts_data.append({
                     "post_id": post.post_id,
                     "content": post.content,
@@ -235,6 +240,7 @@ class PostService:
                     "created_at": post.created_at,
                     "first_name": first_name,
                     "last_name": last_name,
+                    "avatar_url": avatar_url,
                     "event_title": event_title,
                     "react_count": react_count,
                     "comment_count": comment_count,

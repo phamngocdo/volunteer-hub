@@ -13,6 +13,7 @@ class CommentDetail(BaseModel):
     created_at: datetime
     first_name: str
     last_name: str
+    avatar_url: Optional[str] = None 
 
     class Config:
         from_attributes = True
