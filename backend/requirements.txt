@@ -10,7 +10,7 @@ Authlib==1.5.2
 itsdangerous==2.2.0 
 redis==6.0.0
 aiosmtplib==4.0.1
-httpx
-requests
-jinja2
-cloudinary
+httpx==0.28.1
+requests==2.32.5
+jinja2==3.1.6
+cloudinary==1.44.1

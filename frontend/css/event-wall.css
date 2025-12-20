@@ -1,10 +1,24 @@
+/**
+ * @file: event-wall.css
+ * @description: Style cho trang Bảng tin sự kiện (Event Wall), bao gồm bài viết, comment, popup.
+ */
+
+/* =========================================
+   Event Wall Container
+   Layout chính của trang bản tin
+   ========================================= */
 .event-wall-container {
   max-width: 680px;
   margin: 0 auto;
   padding: 20px 0;
+  animation: fadeIn 0.6s ease-out;
 }
 
-/* Tabs */
+
+/* =========================================
+   Tabs Navigation
+   Thanh chuyển đổi giữa 'Tất cả bài viết' và 'Bài viết của tôi'
+   ========================================= */
 .event-tabs {
   display: flex;
   justify-content: space-around;
@@ -12,17 +26,16 @@
   border-radius: 10px;
   margin-bottom: 20px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-
   position: sticky;
   top: 0;
   z-index: 900;
+  transition: all 0.3s ease;
 }
 
 .event-tab-content {
   min-height: 200px;
-  /* giữ không gian để tránh layout nhảy */
+  animation: fadeIn 0.4s ease-out;
 }
-
 
 .tab-btn {
   flex: 1;
@@ -32,11 +45,14 @@
   color: #555;
   padding: 14px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 .tab-btn:hover {
   background: #f3f4f6;
+  color: #373838;
 }
 
 .tab-btn.active {
@@ -44,13 +60,27 @@
   color: #373838;
 }
 
-/* Event post */
+.tab-btn:active {
+  background: #e5e7eb;
+}
+
+
+/* =========================================
+   Event Post Card
+   Style cho từng bài viết hiển thị trên dòng thời gian
+   ========================================= */
 .event-post {
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   margin-bottom: 20px;
   padding: 16px;
+  animation: slideUp 0.5s ease-out both;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.event-post:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }
 
 .event-header {
@@ -64,6 +94,11 @@
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
 }
 
 .post-info h4 {
@@ -92,9 +127,10 @@
 .event-img {
   width: 100%;
   margin-top: 8px;
+  border-radius: 8px;
+  transition: opacity 0.3s ease;
 }
 
-/* Actions */
 .event-actions {
   display: flex;
   justify-content: space-evenly;
@@ -111,9 +147,18 @@
   font-weight: 600;
   color: #65676b;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all 0.2s ease;
 }
 
+.event-actions button:active {
+  transform: scale(0.95);
+}
+
+
+/* =========================================
+   Reactions & Actions
+   Nút like, comment và popup cảm xúc
+   ========================================= */
 .reaction-container {
   position: relative;
   display: inline-block;
@@ -123,16 +168,16 @@
   position: absolute;
   bottom: 45px;
   left: 50%;
-  transform: translateX(-50%) scale(0.95);
+  transform: translateX(-50%) scale(0.8);
   display: flex;
   gap: 8px;
   background: white;
   padding: 6px 10px;
   border-radius: 30px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: opacity 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   z-index: 10;
 }
 
@@ -141,7 +186,6 @@
   pointer-events: auto;
   transform: translateX(-50%) scale(1);
 }
-
 
 .like-btn {
   display: flex;
@@ -153,34 +197,43 @@
   border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 }
 
 .like-btn:hover {
   background: #e4e6eb;
+  transform: translateY(-1px);
+}
+
+.like-btn:active {
+  transform: translateY(0) scale(0.96);
 }
 
 .like-icon {
   width: 22px;
   height: 22px;
-  transition: transform 0.15s;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.like-btn:hover .like-icon {
+  transform: scale(1.1) rotate(-10deg);
 }
 
 .reaction-popup img {
   width: 36px;
   height: 36px;
   cursor: pointer;
-  transition: transform 0.15s;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .reaction-popup img:hover {
-  transform: scale(1.3);
+  transform: scale(1.3) translateY(-3px);
 }
 
 .reaction-container:hover .reaction-popup {
   opacity: 1;
   pointer-events: auto;
-  transform: translateX(-50%) translateY(-5px);
+  transform: translateX(-50%) translateY(-5px) scale(1);
 }
 
 .react,
@@ -196,7 +249,6 @@
   color: #65676b;
 }
 
-/* Comments */
 .comment-btn {
   display: flex;
   align-items: center;
@@ -206,11 +258,16 @@
   cursor: pointer;
   padding: 6px 10px;
   border-radius: 8px;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .comment-btn:hover {
   background-color: #f0f2f5;
+  transform: translateY(-1px);
+}
+
+.comment-btn:active {
+  transform: translateY(0) scale(0.96);
 }
 
 .comment-icon {
@@ -219,7 +276,10 @@
 }
 
 
-/* Overlay toàn màn hình */
+/* =========================================
+   Post Detail Overlay (Modal)
+   Popup hiển thị chi tiết bài viết và danh sách comment
+   ========================================= */
 .post-overlay {
   position: fixed;
   top: 0;
@@ -227,13 +287,15 @@
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
 }
 
-/* Khung chính chứa header + content + form */
 .post-overlay-box {
   background-color: #fff;
   width: 55%;
@@ -241,12 +303,13 @@
   max-height: 92vh;
   display: flex;
   flex-direction: column;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  transform: scale(0.9);
+  animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-/* Header */
 .overlay-header {
   background-color: #fff;
   height: 50px;
@@ -258,7 +321,6 @@
   position: relative;
 }
 
-/* Nút đóng */
 .close-overlay {
   position: absolute;
   top: 10px;
@@ -273,21 +335,22 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .close-overlay:hover {
-  background-color: #ececec;
+  background-color: #e4e4e4;
+  transform: rotate(90deg);
 }
 
-/* Nội dung bài viết */
 .post-overlay-content {
   flex: 1;
   overflow-y: auto;
   padding: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc #f0f0f0;
 }
 
-/* Bình luận */
 .overlay-comments {
   width: 100%;
   display: flex;
@@ -306,21 +369,32 @@
   align-items: flex-start;
   margin-bottom: 5px;
   gap: 8px;
+  animation: fadeIn 0.3s ease;
 }
 
 .comment-item img {
   width: 28px;
   height: 28px;
   border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.comment-item img:hover {
+  transform: scale(1.1);
 }
 
 .comment-content {
   background-color: #f0f2f5;
   border-radius: 16px;
-  padding: 6px 10px;
+  padding: 8px 12px;
   font-size: 0.85rem;
   line-height: 1.3;
   max-width: 85%;
+  transition: background-color 0.2s;
+}
+
+.comment-content:hover {
+  background-color: #e4e6eb;
 }
 
 .comment-form {
@@ -336,8 +410,9 @@
   flex: 1;
   border-radius: 18px;
   border: 1px solid #ccc;
-  padding: 6px 12px;
+  padding: 8px 14px;
   font-size: 0.85rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 #overlaySendBtn {
@@ -352,7 +427,7 @@
 }
 
 #overlaySendBtn:hover {
-  transform: scale(1.1);
+  transform: scale(1.15) rotate(-10deg);
 }
 
 .send-icon {
@@ -364,6 +439,7 @@
 .comment-form input:focus {
   outline: none;
   border-color: #424243;
+  box-shadow: 0 0 0 2px rgba(66, 66, 67, 0.1);
 }
 
 .comment-form button {
@@ -371,25 +447,26 @@
   color: white;
   border: none;
   border-radius: 18px;
-  padding: 6px 12px;
+  padding: 6px 14px;
   font-size: 0.8rem;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
 .comment-form button:hover {
   background-color: #181819;
+  transform: translateY(-1px);
 }
 
-/* Ẩn overlay mặc định */
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 
-
-
-
-/*Tab Đã tham gia*/
+/* =========================================
+   Sidebar: Joined Events
+   Danh sách các sự kiện đã tham gia (cột bên phải)
+   ========================================= */
 .joined-events-tab {
   display: flex;
   flex-direction: column;
@@ -400,32 +477,36 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   margin: 0 auto;
   max-width: 100%;
+  animation: fadeIn 0.5s ease-out;
 }
 
-/* Mỗi event item */
 .joined-event {
   display: flex;
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
   padding: 8px;
   border-radius: 8px;
 }
 
 .joined-event:hover {
   background-color: #f5f5f5;
+  transform: translateX(4px);
 }
 
-/* Avatar event */
 .event-avatar {
   width: 55px;
   height: 55px;
   border-radius: 10px;
   object-fit: cover;
+  transition: transform 0.2s;
 }
 
-/* Tên và số thành viên */
+.joined-event:hover .event-avatar {
+  transform: scale(1.05);
+}
+
 .event-info {
   flex: 1;
 }
@@ -443,7 +524,11 @@
   margin-top: 4px;
 }
 
-/* Tạo bài viết*/
+
+/* =========================================
+   Create Post Box
+   Khu vực tạo bài viết mới
+   ========================================= */
 .create-post-box-header {
   display: flex;
   align-items: center;
@@ -453,6 +538,11 @@
   padding: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 15px;
+  transition: box-shadow 0.2s ease;
+}
+
+.create-post-box-header:hover {
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
 .create-post-input-header {
@@ -464,22 +554,25 @@
   color: #494848;
   border-radius: 30px;
   cursor: pointer;
+  transition: background 0.2s ease;
 }
 
-/*Overlay create post*/
+.create-post-input-header:hover {
+  background: #e4e6eb;
+}
+
 .create-post-box {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-bottom: 15px;
+  animation: slideUp 0.4s ease-out;
 }
 
-/* Hàng chứa avatar + nút upload */
 .post-header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* Avatar bên trái, Upload bên phải */
   padding: 0 10px;
 }
 
@@ -507,7 +600,6 @@
   font-weight: 600;
 }
 
-/* Textarea */
 .post-input-container {
   display: block;
   width: 100%;
@@ -527,9 +619,14 @@
   border-radius: 8px;
   overflow: visible;
   box-sizing: border-box;
+  background: transparent;
 }
 
 
+/* =========================================
+   Image Preview
+   Hiển thị ảnh trước khi đăng
+   ========================================= */
 .image-preview-container {
   display: flex;
   flex-wrap: wrap;
@@ -538,6 +635,7 @@
   gap: 10px;
   margin: 10px;
   overflow-x: hidden;
+  animation: fadeIn 0.3s;
 }
 
 .image-preview-container img {
@@ -546,9 +644,13 @@
   object-fit: cover;
   border: 1px solid #ddd;
   position: relative;
+  transition: transform 0.2s;
 }
 
-/* Nút xóa ảnh */
+.image-preview-container img:hover {
+  transform: scale(1.01);
+}
+
 .image-preview-container .remove-img {
   position: absolute;
   top: 8px;
@@ -563,16 +665,19 @@
   font-size: 14px;
   line-height: 22px;
   text-align: center;
+  transition: all 0.2s;
 }
 
+.image-preview-container .remove-img:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.1);
+}
 
-/* Nút upload ảnh */
 .upload-section {
   display: flex;
   align-items: center;
 }
 
-/* Nút upload chỉ là icon */
 .upload-btn {
   background-color: transparent;
   border: none;
@@ -580,7 +685,7 @@
   padding: 6px;
   gap: 6px;
   border-radius: 50%;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -588,9 +693,9 @@
 
 .upload-btn:hover {
   background-color: #f0f2f5;
+  transform: scale(1.1);
 }
 
-/* Icon upload */
 .upload-icon {
   width: 18px;
   height: 18px;
@@ -621,14 +726,14 @@
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .submit-btn:hover {
   background-color: #000205;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .submit-btn:active {
@@ -640,9 +745,14 @@
   background-color: #ccc;
   cursor: not-allowed;
   box-shadow: none;
+  transform: none;
 }
 
-/* Toast notification */
+
+/* =========================================
+   Toast Notification
+   Thông báo nổi ở góc màn hình
+   ========================================= */
 .toast {
   position: fixed;
   bottom: 20px;
@@ -656,11 +766,81 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.3s, transform 0.3s;
+  transition: opacity 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   z-index: 9999;
 }
 
 .toast.show {
   opacity: 1;
   transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .post-overlay-box {
+    width: 95% !important;
+    max-width: 100% !important;
+    max-height: 95vh !important;
+    height: auto;
+  }
+
+  .comment-content {
+    max-width: 100%;
+  }
+
+  .post-overlay-content {
+    padding: 10px;
+  }
+}
+
+
+/* =========================================
+   Animations
+   Các hiệu ứng chuyển động
+   ========================================= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }

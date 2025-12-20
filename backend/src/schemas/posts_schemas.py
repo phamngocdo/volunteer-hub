@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-# Post
 class PostCreate(BaseModel):
     content: str
     images_url: Optional[str] = None
@@ -14,9 +13,7 @@ class PostDetail(PostCreate):
     created_at: datetime
 
     class Config:
-        from_attributes = True # giúp Pydantic chuyển đổi trực tiếp từ ORM object(SQLAlchemy) sang model mà không cần dict
-
-
+        from_attributes = True
 
 class PostAllDetail(BaseModel):
     post_id: int
@@ -27,10 +24,10 @@ class PostAllDetail(BaseModel):
     created_at: datetime
     first_name: str
     last_name: str
+    event_title: Optional[str] = None
     react_count: int
     comment_count: int
-    user_react: Optional[str] = None  # Có thể là "like", "love", v.v.
+    user_react: Optional[str] = None
 
     class Config:
         from_attributes = True
-

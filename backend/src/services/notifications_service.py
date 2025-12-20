@@ -1,42 +1,105 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
 from src.models.notification_model import Notification
+from src.models.push_nortification_model import PushSubscription
 import traceback
+import os
+from typing import Optional
+
 
 class NotificationService:
     @staticmethod
     async def get_user_notifications(db: Session, user_id: int):
-        """
-        Tìm và trả về các thông báo theo ID người dùng.
-        """
         try:
             query = select(Notification).where(Notification.user_id == user_id)
             return db.execute(query).scalars().all()
         except Exception as e:
             traceback.print_exc()
-            raise
+            raise e
     
 
     @staticmethod
-    async def mark_as_read(db: Session, notification_id: int, user_id: int, is_read: bool):
-        """
-        Tìm thông báo theo ID và cập nhật is_read.
-        """
-        try: 
-            # Tạo câu truy vấn chọn bài post có đúng ID và thuộc về đúng user
-            query = select(Notification).where(
-                Notification.notification_id == notification_id,
-                Notification.user_id == user_id
-            )
-            noti = db.execute(query).scalar_one_or_none()# lấy duy nhất 1 kết quả hoặc None nếu không có
-            # Nếu không tìm thấy thông báo
-            if not noti:
-                return False
-            noti.is_read = is_read
+    async def mark_as_read(db: Session, user_id: int):
+        try:
+            query = select(Notification).where(Notification.user_id == user_id)
+            notifications = db.execute(query).scalars().all()
+
+            if not notifications:
+                return False 
+
+            for noti in notifications:
+                noti.is_read = True
+
             db.commit()
-            db.refresh(noti)
-            return noti
+            return True
         except Exception as e:
             traceback.print_exc()
             db.rollback()
-            raise
+            raise e
+
+
+    @staticmethod
+    async def subcribe_nortificate(db: Session, user_id: int, data):
+        endpoint = data.endpoint
+        p256dh = data.p256dh
+        auth = data.auth
+
+        try:
+            existing = db.query(PushSubscription).filter_by(user_id=user_id, endpoint=endpoint).first()
+            if existing:
+                existing.endpoint = endpoint
+                existing.p256dh = p256dh
+                existing.auth = auth
+            else:
+                new_sub = PushSubscription(
+                    user_id=user_id,
+                    endpoint=endpoint,
+                    p256dh=p256dh,
+                    auth=auth
+                )
+                db.add(new_sub)
+
+            db.commit()
+        except Exception as e:
+            traceback.print_exc()
+            db.rollback()
+            raise e
+    
+
+    @staticmethod
+    async def unsubscribe_notification(db: Session, user_id: int, endpoint: str):
+        try:
+            sub = db.query(PushSubscription).filter_by(user_id=user_id, endpoint=endpoint).first()
+            if not sub:
+                return False
+
+            db.delete(sub)
+            db.commit()
+            return True
+        except Exception as e:
+            traceback.print_exc()
+            db.rollback()
+            raise e
+        
+
+    @staticmethod
+    async def send_notification(db: Session, user_id: int, event_id: Optional[int], title: str, message: str):
+        try:
+            notification = Notification(
+                user_id=user_id,
+                event_id=event_id,
+                message=message,
+            )
+            db.add(notification)
+            db.commit()
+            db.refresh(notification)
+            subscriptions = db.query(PushSubscription).filter_by(user_id=user_id).all()
+
+            def to_dict(obj):
+                return {c.name: getattr(obj, c.name) for c in obj.__table__.columns}
+
+            return [to_dict(sub) for sub in subscriptions]
+
+        except Exception as e:
+            traceback.print_exc()
+            raise e

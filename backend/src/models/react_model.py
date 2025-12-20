@@ -7,7 +7,7 @@ from src.config.db_config import Base
 class React(Base):
     __tablename__ = "reacts"
 
-    like_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    react_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     post_id = Column(Integer, ForeignKey("posts.post_id"))
     user_id = Column(Integer, ForeignKey("users.user_id"))
     category = Column(String(100))  # like | love | haha | wow | sad | angry

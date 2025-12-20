@@ -1,3 +1,12 @@
+/**
+ * @file: footer.css
+ * @description: Style cho phần chân trang (Footer).
+ */
+
+/* =========================================
+   Footer Container
+   Bố cục footer
+   ========================================= */
 .site-footer {
   width: 100%;
   background-color: var(--fg);
@@ -48,6 +57,10 @@
   font-size: 13px;
 }
 
+
+/* =========================================
+   Responsive Footer
+   ========================================= */
 @media (max-width: 860px) {
   .footer-container {
     flex-direction: column;

@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: volunteer_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASS}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - volunteer_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: dockerfile.backend
+    container_name: volunteer_backend
+    ports:
+      - "${BACKEND_PORT}:8000"
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+    networks:
+      - volunteer_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile.frontend
+    container_name: volunteer_frontend
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    depends_on:
+      - backend
+    networks:
+      - volunteer_network
+
+volumes:
+  postgres_data:
+
+networks:
+  volunteer_network:
+    driver: bridge

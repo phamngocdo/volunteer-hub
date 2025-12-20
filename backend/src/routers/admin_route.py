@@ -7,216 +7,180 @@ from enum import Enum
 from fastapi import APIRouter, Depends, status, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
-from typing import List, Optional
+from typing import Optional
 
-# Import các thành phần cần thiết
+from src.utils.send_webpush import send_webpush
 from src.config.db_config import get_db
-from src.schemas import admin_schemas
+from src.schemas.admin_schemas import *
 from src.services.events_service import EventService
-from src.models import User, Event
-from src.config.redis_config import redis_client as r
+from src.services.users_service import UserService
+from src.services.notifications_service import NotificationService
+from src.utils.dependencies import get_current_user, role_required, active_status_required
 
-# --- Enum cho định dạng Export ---
 class ExportFormat(str, Enum):
     json = "json"
     csv = "csv"
 
-# --- Dependency để xác thực quyền Admin ---
-
-async def get_current_admin_user(request: Request, db: Session = Depends(get_db)) -> User:
-    """
-    Dependency để lấy token, xác thực người dùng qua Redis session và kiểm tra vai trò 'admin'.
-    Inject đối tượng User vào các endpoint nếu hợp lệ.
-    """
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
-    
-    token = auth_header.split(" ")[1]
-
-    session_json = await r.get(token)
-    if not session_json:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired or invalid")
-
-    try:
-        session_json = json.loads(session_json)
-        if session_json['role'] != 'admin':
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, 
-                detail="Not authorized. Admin role required."
-            )
-        
-        user = db.query(User).filter(User.user_id == session_json['user_id']).first()
-        if not user:
-             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Admin user not found in database.")
-        return user
-        
-    except HTTPException as e:
-        raise e
-    except Exception:
-        traceback.print_exc()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="An unexpected error occurred")
-
-# --- Khởi tạo Router với Dependency xác thực chung ---
 
 admin_router = APIRouter(
-    # DÒNG QUAN TRỌNG: Áp dụng dependency này cho TẤT CẢ các endpoint bên dưới2
-    dependencies=[Depends(get_current_admin_user)]
+    dependencies=[
+        Depends(active_status_required()),
+        Depends(role_required(("admin")))
+    ]
 )
 
-# --- User Management Endpoints ---
 
-@admin_router.get("/users",
-                  response_model=List[admin_schemas.UserAdminView],
-                  summary="Lấy danh sách tất cả người dùng (có thể lọc theo status)")
+@admin_router.get("/users")
 async def get_all_users(
-    db: Session = Depends(get_db),
-    status: Optional[str] = Query(None, description="Lọc theo trạng thái (ví dụ: 'active', 'banned')")
+    request: Request,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """
-    API để admin lấy danh sách tất cả người dùng.
-    Có thể lọc theo trạng thái (status) qua query parameter.
-    (Không cần `Depends` ở đây nữa vì đã được áp dụng chung)
+    Lấy danh sách người dùng.
+    
+    API dành cho Admin để xem danh sách tất cả người dùng trong hệ thống.
     """
     try:
-        # Bắt đầu câu query cơ bản
-        query = select(User)
-        
-        # Thêm điều kiện lọc 'where' nếu 'status' được cung cấp
-        if status:
-            query = query.where(User.status == status)
-            
-        # Luôn sắp xếp theo ngày tạo mới nhất
-        query = query.order_by(User.created_at.desc())
-        
-        result = db.execute(query)
-        return result.scalars().all()
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not fetch users")
+        return await UserService.get_all_users(db)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+    
 
-@admin_router.patch("/users/{user_id}", 
-              response_model=admin_schemas.UserAdminView,
-              summary="Cập nhật trạng thái người dùng (Khóa/Mở khóa)")
+@admin_router.get("/events")
+async def get_all_events(
+    request: Request,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy danh sách sự kiện (Admin).
+    
+    API dành cho Admin để xem danh sách tất cả sự kiện, bao gồm các sự kiện chưa được duyệt.
+    """
+    try:
+        return await EventService.get_all_events(db)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {e}")
+    
+
+@admin_router.patch("/users/{user_id}")
 async def update_user_status(
     user_id: int, 
-    status_update: admin_schemas.UserStatusUpdate, 
+    status_update: UserStatusUpdate, 
     db: Session = Depends(get_db)
 ):
     """
-    API để admin thay đổi trạng thái của một người dùng ('active' hoặc 'banned').
-    """
-    user_to_update = db.query(User).filter(User.user_id == user_id).first()
-    if not user_to_update:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id {user_id} not found")
+    Cập nhật trạng thái người dùng (Ban/Unban).
     
-    try:
-        user_to_update.status = status_update.status.value
-        db.commit()
-        db.refresh(user_to_update)
-        try:
-            all_keys = await r.keys("*")
-            for key in all_keys:
-                data = await r.get(key)
-                if not data:
-                    continue
-                session = json.loads(data)
-                if session.get("user_id") == user_id:
-                    session["status"] = user_to_update.status
-                    await r.set(key, json.dumps(session))
-
-        except Exception as redis_error:
-            print(f"Redis sync failed: {redis_error}")
-
-        return user_to_update
-    except Exception:
-        db.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not update user status")
-
-# --- Event Management Endpoints ---
-
-@admin_router.get("/events", 
-            response_model=List[admin_schemas.EventAdminView],
-            summary="Lấy danh sách tất cả sự kiện")
-async def get_all_events(
-    status_filter: Optional[str] = Query(None, alias="status", description="Lọc sự kiện theo trạng thái"),
-    db: Session = Depends(get_db)
-):
-    """
-    API để admin lấy danh sách tất cả sự kiện, có thể lọc theo trạng thái.
+    Cho phép Admin khóa (banned) hoặc mở khóa (active) tài khoản người dùng.
     """
     try:
-        query = select(Event).order_by(Event.created_at.desc())
-        if status_filter:
-            query = query.where(Event.status == status_filter)
-        result = db.execute(query)
-        return result.scalars().all()
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not fetch events")
+        result = await UserService.update_user_status(db, user_id, status_update.status)
+        if not result:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id {user_id} not found")
+        
+        title = "Cập nhật trạng thái tài khoản"
+        message = "Bạn đã bị khóa tài khoản." if status_update.status == UserStatus.BANNED else "Tài khoản của bạn đã được mở khóa."
+        subs = await NotificationService.send_notification(
+            db=db,
+            event_id=None,
+            user_id=user_id,
+            title=title,
+            message=message
+        )
+
+        if subs:
+            send_webpush(title, message, subs)
+        return result
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
+
 
 @admin_router.patch("/events/{event_id}",
-              response_model=admin_schemas.EventAdminView,
-              summary="Duyệt hoặc từ chối sự kiện")
+              response_model=EventAdminView)
 async def update_event_status(
     event_id: int,
-    status_update: admin_schemas.EventStatusUpdate,
+    status_update: EventStatusUpdate,
     db: Session = Depends(get_db)
-):
+): 
     """
-    API để admin duyệt hoặc từ chối một sự kiện ('approved' hoặc 'rejected').
-    """
-    event_to_update = await EventService.get_event_by_id(db, event_id)
-    if not event_to_update:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Event with id {event_id} not found")
-        
-    try:
-        event_to_update.status = status_update.status.value
-        db.commit()
-        db.refresh(event_to_update)
-        return event_to_update
-    except Exception:
-        db.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not update event status")
+    Duyệt sự kiện.
     
-@admin_router.delete("/events/{event_id}",
-               status_code=status.HTTP_204_NO_CONTENT,
-               summary="Xóa một sự kiện (quyền admin)")
+    Cho phép Admin duyệt (approve) hoặc từ chối (reject) một sự kiện đã được tạo bởi Manager.
+    """
+    try:
+        event_to_update = await EventService.get_event_by_id(db, event_id)
+        if not event_to_update:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Event with id {event_id} not found")
+        updated_event = await EventService.update_event_status(db, event_id, status_update.status)
+
+        title = "Cập nhật trạng thái sự kiện"
+        message = f"Sự kiện {event_to_update.title} được duyệt thành công" if status_update.status == EventStatusAdminUpdate.APPROVED else f"Sự kiện {event_to_update.title} bị từ chối duyệt."
+        subs = await NotificationService.send_notification(
+            db=db,
+            event_id=event_id,
+            user_id=event_to_update.manager_id,
+            title=title,
+            message=message
+        )
+
+        if subs:
+            send_webpush(title, message, subs)
+
+        return updated_event
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
+    
+
+@admin_router.delete("/events/{event_id}")
 async def delete_event_by_admin(
     event_id: int, 
     db: Session = Depends(get_db)
 ):
     """
-    API để admin xóa một sự kiện khỏi hệ thống bằng EventService.
+    Xóa sự kiện (Admin).
+    
+    Cho phép Admin xóa vĩnh viễn bất kỳ sự kiện nào khỏi hệ thống.
     """
-    success = await EventService.delete_event(db, event_id)
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Event with id {event_id} not found or could not be deleted"
-        )
-    return
+    try:
+        result = await EventService.delete_event(db, event_id)
+        if not result:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Event with id {event_id} not found")
+        return {"detail": "Event deleted successfully"}
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
+    
 
-@admin_router.get("/export/users", summary="Xuất dữ liệu người dùng")
+@admin_router.get("/export/users")
 async def export_users_data(
     format: ExportFormat = Query(..., description="Định dạng file cần xuất: 'csv' hoặc 'json'"),
     db: Session = Depends(get_db)
 ):
     """
-    API để admin xuất toàn bộ dữ liệu người dùng ra file CSV hoặc JSON.
-    Đã sửa để xử lý datetime và chỉ xuất các trường trong schema UserExport.
-    """
-    # Sửa: Dùng select()
-    users_db = db.execute(select(User)).scalars().all()
+    Xuất dữ liệu người dùng.
     
-    # Sửa: Chuyển đổi sang Pydantic model
+    Xuất danh sách người dùng ra file CSV hoặc JSON.
+    """
+    users = await UserService.get_all_users(db)
+    
     try:
-        users_export = [admin_schemas.UserExport.from_orm(user) for user in users_db]
+        users_export = [UserExport.model_validate(user) for user in users]
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error parsing user data: {e}")
 
     if format == ExportFormat.json:
-        # Sửa: Dùng .model_dump() (Pydantic v2) hoặc .dict() (Pydantic v1)
-        # Pydantic đã tự động chuyển datetime thành string
         users_data = [user.model_dump() for user in users_export]
         safe_data = json.loads(json.dumps(users_data, default=str))
         return JSONResponse(content=safe_data)
@@ -225,17 +189,15 @@ async def export_users_data(
         output = io.StringIO()
         writer = csv.writer(output)
         
-        # Sửa: Lấy header từ Pydantic model để đảm bảo nhất quán
-        headers = list(admin_schemas.UserExport.model_fields.keys()) # Pydantic v2
-        # (Dùng list(UserExport.__fields__.keys()) cho Pydantic v1)
+        headers = list(UserExport.model_fields.keys())
         writer.writerow(headers)
         
-        # Sửa: Ghi dữ liệu từ Pydantic model
         for user in users_export:
             writer.writerow([getattr(user, h) for h in headers])
             
         output.seek(0)
         return StreamingResponse(output, media_type="text/csv", headers={"Content-Disposition": "attachment; filename=users.csv"})
+    
 
 @admin_router.get("/export/events", summary="Xuất dữ liệu sự kiện")
 async def export_events_data(
@@ -243,22 +205,20 @@ async def export_events_data(
     db: Session = Depends(get_db)
 ):
     """
-    API để admin xuất toàn bộ dữ liệu sự kiện ra file CSV hoặc JSON.
-    Đã sửa để xử lý datetime và chỉ xuất các trường trong schema EventExport.
+    Xuất dữ liệu sự kiện.
+    
+    Xuất danh sách sự kiện ra file CSV hoặc JSON.
     """
-    # Sửa: Dùng select()
-    events_db = db.execute(select(Event)).scalars().all()
+    events_db = await EventService.get_public_events(db)
 
-    # Sửa: Chuyển đổi sang Pydantic model
     try:
-        events_export = [admin_schemas.EventExport.from_orm(event) for event in events_db]
+        events_export = [EventExport.model_validate(event) for event in events_db]
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error parsing event data: {e}")
 
     if format == ExportFormat.json:
-        # Sửa: Dùng .model_dump() (Pydantic v2) hoặc .dict() (Pydantic v1)
-        # Bỏ qua cách làm json.dumps(json.loads()) không hiệu quả
+
         events_data = [event.model_dump() for event in events_export]
         safe_data = json.loads(json.dumps(events_data, default=str))
         return JSONResponse(content=safe_data)
@@ -267,12 +227,9 @@ async def export_events_data(
         output = io.StringIO()
         writer = csv.writer(output)
         
-        # Sửa: Lấy header từ Pydantic model
-        headers = list(admin_schemas.EventExport.model_fields.keys()) # Pydantic v2
-        # (Dùng list(EventExport.__fields__.keys()) cho Pydantic v1)
+        headers = list(EventExport.model_fields.keys())
         writer.writerow(headers)
         
-        # Sửa: Ghi dữ liệu từ Pydantic model
         for event in events_export:
             writer.writerow([getattr(event, h) for h in headers])
             

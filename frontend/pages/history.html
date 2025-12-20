@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="../css/history.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<div class="history-container">
+  <div class="page-header">
+    <h2>Lịch sử tham gia sự kiện</h2>
+  </div>
+
+  <div class="filters">
+    <label for="statusFilter">Lọc theo trạng thái:</label>
+    <select id="statusFilter">
+      <option value="">Tất cả</option>
+      <option value="approved">Đã tham gia</option>
+      <option value="completed">Đã hoàn thành</option>
+    </select>
+  </div>
+
+  <div class="table-container" id="historyTable">
+    <p>Đang tải lịch sử tham gia...</p>
+  </div>
+</div>
+
+<div id="cancelModal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <button class="modal-close"><i class="fa-solid fa-xmark"></i></button>
+    <h3 id="modalTitle" class="modal-title">Xác nhận hủy tham gia sự kiện</h3>
+    <div class="modal-footer">
+      <button id="modalCancelBtn" class="modal-btn cancel">Hủy</button>
+      <button id="modalConfirmBtn" class="modal-btn confirm">Xác nhận</button>
+    </div>
+  </div>
+</div>

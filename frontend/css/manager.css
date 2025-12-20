@@ -1,425 +1,474 @@
-/*
- * ===========================================
- * CSS cho Trang Quản lý (Manager)
- * Đã được nâng cấp để tăng tính đồng nhất và responsive.
- * ===========================================
+/**
+ * @file: manager.css
+ * @description: Style cho trang quản trị sự kiện của Manager (cá nhân).
  */
 
-/* * --- Biến màu và Kiểu dáng Chung ---
- */
+/* =========================================
+   Global Variables
+   ========================================= */
 :root {
-  --primary-color: #007bff;
-  --danger-color: #dc3545;
-  --secondary-color: #6c757d;
-  --success-color: #28a745;
-  --warning-color: #ffc107;
-  --light-bg: #f8f9fa;
-  --border-color: #dee2e6;
-  --text-color: #333;
-  --text-color-muted: #555;
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --border-radius: 8px;
+  --primary: #18181b;
+  --primary-hover: #27272a;
+  --bg-body: #f4f4f5;
+  --bg-card: #ffffff;
+  --text-main: #27272a;
+  --text-muted: #71717a;
+  --border: #e4e4e7;
+  --danger: #ef4444;
+  --danger-bg: #fee2e2;
+  --success: #10b981;
+  --success-bg: #d1fae5;
+  --warning: #f59e0b;
+  --warning-bg: #fef3c7;
+  --radius: 8px;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --font-base: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* [NÂNG CẤP] 1. Áp dụng box-sizing toàn cục.
- * Giúp việc tính toán padding và border dễ dàng hơn.
- */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* * --- Kiểu dáng Container Chính ---
- */
+
+/* =========================================
+   Manager Container
+   Layout chính
+   ========================================= */
 .manager-container {
-  max-width: 1100px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: #ffffff;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow);
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 24px;
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* * --- Tiêu đề trang ---
- */
+
+/* =========================================
+   Header
+   ========================================= */
 .page-header {
   display: flex;
-  flex-wrap: wrap; /* [NÂNG CẤP] Thêm wrap cho an toàn */
   justify-content: space-between;
   align-items: center;
-  gap: 1rem; /* [NÂNG CẤP] Thêm gap thay cho margin */
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
 }
 
 .page-header h1 {
-  margin: 0;
-  font-size: 2rem;
-  color: var(--text-color);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.5px;
 }
 
-/* * --- Kiểu dáng Nút (Button) Chung ---
- */
+
+/* =========================================
+   Buttons
+   ========================================= */
 .btn {
-  padding: 0.75rem 1.25rem;
-  border: 1px solid transparent; /* [NÂNG CẤP] Thêm border để outline không bị giật */
-  border-radius: var(--border-radius);
-  font-size: 1rem;
-  font-weight: 600;
-  line-height: 1.5; /* [NÂNG CẤP] Đảm bảo chiều cao chữ */
-  cursor: pointer;
-  text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--radius);
+  cursor: pointer;
   transition: all 0.2s ease;
-  color: #fff; /* Màu chữ mặc định là trắng */
+  border: 1px solid transparent;
+  white-space: nowrap;
+  text-decoration: none;
+  user-select: none;
 }
 
-.btn:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
+.btn:active {
+  transform: scale(0.96);
 }
 
 .btn-primary {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
+  background-color: var(--primary);
+  color: #fff;
 }
-.btn-danger {
-  background-color: var(--danger-color);
-  border-color: var(--danger-color);
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
+
 .btn-secondary {
-  background-color: var(--secondary-color);
-  border-color: var(--secondary-color);
-}
-.btn-success {
-  background-color: var(--success-color);
-  border-color: var(--success-color);
-}
-
-/* [NÂNG CẤP] 2. Thêm một kiểu nút phổ biến (outline).
- * Rất hữu ích cho các nút "Hủy" hoặc "Xem chi tiết".
- */
-.btn-outline-secondary {
   background-color: #fff;
-  border-color: var(--border-color);
-  color: var(--text-color-muted);
+  border-color: var(--border);
+  color: var(--text-main);
 }
+
+.btn-secondary:hover {
+  background-color: #f4f4f5;
+  border-color: #d4d4d8;
+}
+
+.btn-danger {
+  background-color: #fff;
+  border-color: var(--border);
+  color: var(--danger);
+}
+
+.btn-danger:hover {
+  background-color: var(--danger-bg);
+  border-color: var(--danger-bg);
+}
+
+.btn-success {
+  background-color: #fff;
+  border-color: var(--border);
+  color: var(--success);
+}
+
+.btn-success:hover {
+  background-color: var(--success-bg);
+  border-color: var(--success-bg);
+}
+
+.btn-outline-secondary {
+  background-color: transparent;
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
 .btn-outline-secondary:hover {
-  background-color: var(--light-bg);
-  border-color: var(--secondary-color);
-  color: var(--text-color);
+  background-color: #f4f4f5;
+  color: var(--primary);
+  border-color: #d4d4d8;
 }
 
-/* Nút nhỏ, dùng trong bảng */
 .btn-sm {
-  padding: 0.35rem 0.75rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  gap: 0.35rem;
+  padding: 6px 12px;
+  font-size: 13px;
 }
 
-/* * --- Danh sách Sự kiện của Manager ---
- */
 #my-events-list {
   display: grid;
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
 }
 
+
+/* =========================================
+   Event List (Cards)
+   Danh sách sự kiện dạng lưới
+   ========================================= */
 .manager-event-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.5rem; /* [NÂNG CẤP] Dùng gap thay cho flex-basis */
-  padding: 1.5rem;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  background-color: #fff;
-  transition: box-shadow 0.2s ease;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  animation: slideUpFade 0.5s ease-out backwards;
 }
 
 .manager-event-item:hover {
-  box-shadow: var(--shadow);
+  transform: translateY(-4px);
 }
 
+
+/* =========================================
+   Event Item Details
+   Thông tin chi tiết trong thẻ sự kiện
+   ========================================= */
 .event-info {
-  flex: 1 1 50%; /* [NÂNG CẤP] Linh hoạt hơn */
-  min-width: 300px;
+  flex: 1;
 }
 
 .event-info h4 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.25rem;
-  color: var(--primary-color);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--primary);
+  line-height: 1.4;
 }
 
 .event-info p {
-  margin: 0.3rem 0;
-  color: var(--text-color-muted);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.95rem;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 8px;
 }
 
 .event-info p i {
   width: 16px;
   text-align: center;
+  color: var(--primary);
 }
 
 .event-actions {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
   display: flex;
+  gap: 12px;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  flex: 1 1 30%; /* [NÂNG CẤP] Linh hoạt hơn */
   justify-content: flex-end;
-  min-width: 250px;
 }
 
-/* * --- Trạng thái (Status Badge) ---
- */
+
+/* =========================================
+   Status Badges
+   ========================================= */
 .status {
-  font-size: 0.8rem;
-  font-weight: 700;
-  padding: 0.25rem 0.6rem;
-  border-radius: 20px;
-  color: #fff;
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
-  white-space: nowrap; /* Tránh bị vỡ chữ */
+  letter-spacing: 0.5px;
 }
+
 .status-pending {
-  background-color: var(--warning-color);
-  color: #333;
+  background: var(--warning-bg);
+  color: #b45309;
 }
+
 .status-approved {
-  background-color: var(--success-color);
+  background: var(--success-bg);
+  color: #047857;
 }
+
 .status-rejected {
-  background-color: var(--danger-color);
+  background: var(--danger-bg);
+  color: #b91c1c;
 }
+
 .status-completed {
-  background-color: var(--secondary-color);
+  background: #f3f4f6;
+  color: #4b5563;
 }
 
-/* * ===========================================
- * Kiểu dáng Modal Chung (Quan trọng)
- * ===========================================
- */
 
+/* =========================================
+   Modals (Create/Edit Form)
+   Form tạo/sửa sự kiện popup
+   ========================================= */
 .modal-overlay {
   position: fixed;
-  inset: 0; /* [NÂNG CẤP] Tương đương top/left/right/bottom = 0 */
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1000;
-  opacity: 1;
-  transition: opacity 0.3s ease;
-  padding: 1rem;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.modal-overlay.hidden {
-  opacity: 0;
-  pointer-events: none;
+.modal-overlay:not(.hidden) {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .modal-content {
-  background-color: #fff;
-  padding: 2rem;
-  border-radius: var(--border-radius);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  background: var(--bg-card);
   width: 100%;
   max-width: 600px;
-  position: relative;
-  transform: scale(1);
-  transition: transform 0.3s ease;
-  
-  /* [NÂNG CẤP] 3. Áp dụng cho TẤT CẢ modal, không chỉ form.
-   * Đảm bảo modal cao không bị tràn màn hình.
-   */
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   max-height: 90vh;
   overflow-y: auto;
+  position: relative;
+
+  /* Animation Scale */
+  transform: scale(0.9);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
 }
 
-.modal-overlay.hidden .modal-content {
-  transform: scale(0.95); /* [NÂNG CẤP] Giảm hiệu ứng scale một chút */
+.modal-overlay:not(.hidden) .modal-content {
+  transform: scale(1);
+  opacity: 1;
 }
 
 .modal-close {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: 20px;
+  right: 20px;
   background: none;
   border: none;
-  font-size: 1.5rem;
-  color: #aaa;
+  font-size: 20px;
+  color: var(--text-muted);
   cursor: pointer;
-  transition: color 0.2s ease;
-  line-height: 1; /* Căn giữa icon */
+  padding: 4px;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.2s;
 }
 
 .modal-close:hover {
-  color: #333;
+  background-color: #f4f4f5;
+  color: var(--primary);
 }
 
-/* * --- Kiểu dáng riêng cho Modal Xác nhận Xóa ---
- */
 #deleteConfirmModal h3 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: var(--primary);
 }
 
 #deleteConfirmModal p {
-  margin-bottom: 2rem;
-  font-size: 1.1rem;
-  color: #444;
+  color: var(--text-muted);
+  margin-bottom: 24px;
   line-height: 1.6;
 }
 
 .modal-footer {
   display: flex;
-  flex-wrap: wrap; /* [NÂNG CẤP] Thêm wrap */
   justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 1.5rem;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
 }
-
-/* * ===========================================
- * Kiểu dáng Form (Trong Modal)
- * ===========================================
- */
 
 .form-container.modal-content {
   max-width: 700px;
-  /* Không cần max-height và overflow-y ở đây nữa, vì đã chuyển lên .modal-content */
 }
 
 #form-title {
-  margin-top: 0;
-  margin-bottom: 2rem;
-  font-size: 1.75rem;
-  color: var(--text-color);
+  font-size: 20px;
+  font-weight: 700;
   text-align: center;
+  margin-bottom: 24px;
+  color: var(--primary);
 }
 
+
+/* =========================================
+   Form Elements
+   Style cho các input trong form
+   ========================================= */
 .form-group {
-  margin-bottom: 1.25rem;
+  margin-bottom: 20px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  color: var(--text-color);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--primary);
 }
 
 .form-group .required {
-  color: var(--danger-color);
-  margin-left: 0.25rem;
-  font-weight: 700;
+  color: var(--danger);
+  margin-left: 2px;
 }
 
-/* Kiểu dáng chung cho các input, textarea, select */
-.form-group input[type="text"],
-.form-group input[type="date"],
+.form-group input,
 .form-group textarea,
 .form-group select {
   width: 100%;
-  padding: 0.75rem;
-  font-size: 1rem;
-  color: var(--text-color);
-  background-color: #fff; /* [NÂNG CẤP] Đảm bảo nền trắng */
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
   font-family: inherit;
-  /* box-sizing: border-box; đã được áp dụng toàn cục */
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #fff;
+  color: var(--primary);
 }
 
-.form-group select {
-  cursor: pointer; /* Thêm con trỏ */
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(24, 24, 27, 0.1);
 }
 
 .form-group textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 100px;
 }
 
-/* Hiệu ứng focus cho input */
-.form-group input[type="text"]:focus,
-.form-group input[type="date"]:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-}
-
-/* Placeholder style */
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-  color: #adb5bd;
-  opacity: 1;
-}
-
-/* Layout hàng cho ngày bắt đầu/kết thúc */
 .form-group-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-  margin-bottom: 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
-.form-group-row .form-group {
-  flex: 1;
-  min-width: 200px;
-  margin-bottom: 0;
-}
-
-/* [NÂNG CẤP] 4. Đồng nhất cách ẩn/hiện lỗi.
- * Thay vì `display: none` trên ID, dùng class `.hidden`
- * (giống như cách bạn làm với modal) để JS bật/tắt.
- */
 .form-error-message {
-  color: var(--danger-color);
-  background-color: rgba(220, 53, 69, 0.05);
-  border: 1px solid rgba(220, 53, 69, 0.1);
-  padding: 0.75rem;
-  border-radius: var(--border-radius);
-  margin-bottom: 1rem;
+  color: var(--danger);
+  background-color: var(--danger-bg);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
   text-align: center;
-  font-weight: 600;
+  font-weight: 500;
+  font-size: 14px;
+  animation: slideUpFade 0.3s ease;
 }
-/* Bạn có thể thêm class .hidden (giống modal) vào #form-error
-   và dùng JS để .classList.remove('hidden') / .classList.add('hidden')
-   Hoặc giữ nguyên cách cũ (JS thay đổi style.display) đều được. 
-   Code gốc của bạn dùng display:none, tôi giữ lại cho đỡ lỗi JS. */
+
 #form-error {
-   display: none; 
+  display: none;
 }
 
 
-/* * ===========================================
- * Kiểu dáng Bảng (Table)
- * ===========================================
- */
+/* =========================================
+   Registration Table (Inside Modal)
+   Bảng danh sách đăng ký bên trong popup chi tiết
+   ========================================= */
 .table-container {
   width: 100%;
-  overflow-x: auto; /* Quan trọng: Cho phép cuộn ngang */
+  overflow-x: auto;
   background-color: #fff;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  margin-top: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  margin-top: 24px;
+  animation: slideUpFade 0.7s ease-out;
 }
 
 .registration-table {
@@ -427,154 +476,126 @@
   border-collapse: collapse;
 }
 
-.registration-table th,
-.registration-table td {
-  padding: 1rem 1.25rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border-color);
-  vertical-align: middle;
-  /* [NÂNG CẤP] 5. Ngăn text bị vỡ khi bảng quá hẹp.
-   * Buộc bảng phải cuộn thay vì làm hỏng chữ.
-   */
-  white-space: nowrap;
-}
-
 .registration-table th {
-  background-color: var(--light-bg);
+  background-color: #f4f4f5;
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
 }
 
-.registration-table tr:last-child td {
-  border-bottom: none;
+.registration-table td {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.registration-table tr {
+  transition: background-color 0.2s;
 }
 
 .registration-table tr:hover {
-  background-color: #fcfcfc;
+  background-color: #f8fafc;
 }
 
 .actions-cell {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 8px;
   align-items: center;
-  /* [NÂNG CẤP] Cho phép chữ trong cell này được xuống dòng */
-  white-space: normal;
 }
 
 .actions-cell span {
-  font-size: 0.9rem;
-  color: var(--secondary-color);
+  font-size: 13px;
+  color: var(--text-muted);
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 6px;
 }
 
-.registration-table .error {
-  color: var(--danger-color);
-  font-weight: 600;
-  text-align: center;
-}
 
-/* * ===========================================
- * Kiểu dáng Xem trước Ảnh (Image Preview)
- * ===========================================
- */
-
-/* [NÂNG CẤP] 6. Đã xóa code .image-preview-area bị trùng lặp ở cuối file. */
+/* =========================================
+   Image Preview
+   Khu vực hiển thị ảnh upload
+   ========================================= */
 .image-preview-area {
   width: 100%;
-  max-height: 200px;
-  border: 2px dashed #ccc;
-  border-radius: var(--border-radius); /* [NÂNG CẤP] Dùng biến chung */
+  height: 200px;
+  border: 2px dashed var(--border);
+  border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: #fafafa;
+  color: var(--text-muted);
   overflow: hidden;
-  background: #f9f9f9;
-  color: #888;
+  margin-top: 8px;
+  transition: all 0.2s;
+}
+
+.image-preview-area:hover {
+  background-color: #f4f4f5;
+  border-color: #a1a1aa;
 }
 
 .image-preview-area img {
-  max-width: 100%;
-  height: auto;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
 }
 
-/* * ===========================================
- * Responsive (Điểm ngắt di động)
- * ===========================================
- */
 
+/* =========================================
+   Responsive
+   ========================================= */
 @media (max-width: 768px) {
   .manager-container {
-    margin: 1rem;
-    padding: 1rem;
-  }
-
-  /* [NÂNG CẤP] Giảm cỡ chữ tiêu đề trên di động */
-  .page-header h1 {
-    font-size: 1.75rem;
+    padding: 0 16px;
+    margin: 24px auto;
   }
 
   .page-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 16px;
   }
 
-  /* Cho các item sự kiện xếp chồng lên nhau */
-  .manager-event-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+  .page-header .btn {
+    width: 100%;
   }
 
-  .event-info,
-  .event-actions {
-    flex-basis: 100%;
-    min-width: 100%; /* [NÂNG CẤP] Đảm bảo 100% */
+  #my-events-list {
+    grid-template-columns: 1fr;
   }
 
-  .event-actions {
-    justify-content: flex-start;
-  }
-
-  /* Cho các input ngày xếp chồng lên nhau */
   .form-group-row {
-    flex-direction: column;
-    gap: 1.25rem;
-    margin-bottom: 1.25rem;
-  }
-
-  .form-group-row .form-group {
-    min-width: 100%;
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 
   .modal-content {
-    padding: 1.5rem;
-    margin: 0; /* [NÂNG CẤP] Cho modal chiếm 100% (do padding 1rem của overlay) */
+    padding: 24px;
+    margin: 0;
     max-height: 95vh;
+    width: 95%;
   }
 
-  #form-title {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  /* Nút trong footer modal xếp chồng */
   .modal-footer {
-    flex-direction: column;
-    gap: 0.75rem;
+    flex-direction: column-reverse;
+    gap: 12px;
   }
 
   .modal-footer .btn {
-    width: 100%; /* Nút chiếm 100% chiều rộng */
+    width: 100%;
   }
 
-  /* [NÂNG CẤP] Cho phép cell trong bảng cuộn dễ hơn */
   .registration-table th,
   .registration-table td {
-    padding: 0.75rem 1rem;
+    padding: 12px;
   }
 }

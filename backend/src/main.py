@@ -7,6 +7,7 @@ import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from src.routers.auth_route import auth_router
 from src.routers.users_route import users_router
@@ -18,6 +19,7 @@ from src.routers.notifications_route import notifications_router
 from src.routers.admin_route import admin_router
 
 SRC_DIR = Path(__file__).resolve().parent
+ROOT_DIR = SRC_DIR.parent.parent
 
 load_dotenv()
 
@@ -25,6 +27,8 @@ backend_port = int(os.getenv("BACKEND_PORT", 8000))
 frontend_port = int(os.getenv("FRONTEND_PORT", 3000))
 
 app = FastAPI()
+
+app.mount("/static", StaticFiles(directory=ROOT_DIR / "frontend/public"), name="static")
 
 app.add_middleware(
     CORSMiddleware,
@@ -54,9 +58,6 @@ def start():
         reload=True,
         reload_dirs=[str(SRC_DIR)]
     )
-
-# if __name__ == "__main__":
-#     start()
-
+    
 if __name__ == "__main__":
     start()

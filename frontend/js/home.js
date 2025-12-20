@@ -1,5 +1,14 @@
-import { navigateTo } from "./main.js";
+/**
+ * @file: home.js
+ * @description: Logic cho trang chủ, bao gồm hiển thị danh sách sự kiện, bộ lọc, và popup chi tiết sự kiện.
+ */
 
+import { navigateTo, getTokenPayload } from "/js/main.js";
+
+/**
+ * Khởi tạo trang chủ
+ * Lấy dữ liệu sự kiện, render danh sách, và xử lý các bộ lọc.
+ */
 export function initHomePage() {
   const container = document.getElementById("eventsContainer");
   if (!container) return;
@@ -20,6 +29,10 @@ export function initHomePage() {
   let allEvents = [];
   let currentEvent = null;
 
+
+  /**
+   * Tải danh sách sự kiện từ API (có cache sessionStorage)
+   */
   async function fetchEvents() {
     try {
       const cached = sessionStorage.getItem("events_data");
@@ -29,7 +42,6 @@ export function initHomePage() {
       if (cached && cacheTime && now - parseInt(cacheTime) < 60000) {
         allEvents = JSON.parse(cached);
         renderEvents(allEvents);
-        checkURLForModal();
         return;
       }
 
@@ -40,7 +52,6 @@ export function initHomePage() {
       sessionStorage.setItem("events_cache_time", now.toString());
 
       renderEvents(allEvents);
-      checkURLForModal();
     } catch (err) {
       console.error("Lỗi tải sự kiện:", err);
     }
@@ -51,6 +62,11 @@ export function initHomePage() {
     return `${day}/${month}/${year}`;
   }
 
+
+  /**
+   * Render danh sách sự kiện ra giao diện
+   * @param {Array} events - Mảng các object sự kiện
+   */
   function renderEvents(events) {
     container.innerHTML = "";
     if (events.length === 0) {
@@ -82,6 +98,11 @@ export function initHomePage() {
     });
   }
 
+
+  /**
+   * Mở modal chi tiết sự kiện
+   * @param {Object} ev - Object sự kiện
+   */
   function openModal(ev) {
     currentEvent = ev;
     modalImage.src = ev.image_url;
@@ -105,12 +126,23 @@ export function initHomePage() {
     history.pushState({ modal: true, eventId: ev.event_id }, "", `?event=${ev.event_id}`);
   }
 
+
+  /**
+   * Đóng modal chi tiết sự kiện
+   * @param {boolean} push - Có cập nhật lại URL history hay không
+   */
   function closeModal(push = true) {
     modal.classList.add("hidden");
     currentEvent = null;
     if (push) history.pushState({ modal: false }, "", "/home");
   }
 
+
+  /**
+   * Kiểm tra trạng thái đăng ký của user đối với sự kiện
+   * @param {number} eventId - ID sự kiện
+   * @returns {string} - Trạng thái đăng ký (pending, approved, etc.) hoặc "not_registered"
+   */
   async function fetchRegistrationStatus(eventId) {
     const token = localStorage.getItem("access_token");
     const token_type = localStorage.getItem("token_type");
@@ -128,8 +160,13 @@ export function initHomePage() {
     }
   }
 
+
+  /**
+   * Cập nhật nút tham gia/hủy dựa trên trạng thái đăng ký và role user
+   * @param {number} eventId - ID sự kiện
+   */
   async function updateJoinButton(eventId) {
-    const userRole = localStorage.getItem("role");
+    const userRole = getTokenPayload()?.role || "guest";
 
     if (userRole === "manager" || userRole === "admin") {
       joinBtn.style.display = "none";
@@ -179,6 +216,10 @@ export function initHomePage() {
     }
   }
 
+
+  /**
+   * Xử lý hành động tham gia sự kiện
+   */
   async function joinEvent() {
     if (!currentEvent) return;
 
@@ -219,6 +260,11 @@ export function initHomePage() {
   }
 
 
+
+  /**
+   * Xử lý hành động hủy tham gia sự kiện
+   * @param {number} eventId - ID sự kiện
+   */
   async function cancelEvent(eventId) {
     const token = localStorage.getItem("access_token");
     const token_type = localStorage.getItem("token_type");
@@ -230,7 +276,7 @@ export function initHomePage() {
     }
 
     try {
-      const res = await fetch(`http://localhost:8000/api/events/${eventId}/cancel-registration`, {
+      const res = await fetch(`http://localhost:8000/api/events/${eventId}/registration`, {
         method: "DELETE",
         headers: { "Authorization": `${token_type} ${token}` }
       });
@@ -244,6 +290,10 @@ export function initHomePage() {
     }
   }
 
+
+  /**
+   * Áp dụng bộ lọc (tìm kiếm, trạng thái, danh mục, ngày) lên danh sách sự kiện
+   */
   function applyFilters() {
     const keyword = searchInput.value.toLowerCase();
     const status = statusFilter.value;

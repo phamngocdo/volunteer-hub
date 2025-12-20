@@ -1,3 +1,12 @@
+/**
+ * @file: register.js
+ * @description: Xử lý logic đăng ký tài khoản mới cho người dùng.
+ */
+
+/**
+ * Khởi tạo trang đăng ký
+ * Tìm form đăng ký và gắn sự kiện submit.
+ */
 function initRegisterPage() {
   const form = document.querySelector(".login-form");
 
@@ -9,6 +18,11 @@ function initRegisterPage() {
   }
 }
 
+
+/**
+ * Xử lý sự kiện đăng ký qua Email
+ * @param {HTMLFormElement} form - Element form đăng ký
+ */
 function initEmailRegister(form) {
   const firstNameInput = form.querySelector("#first_name");
   const lastNameInput = form.querySelector("#last_name");
@@ -100,6 +114,13 @@ function initEmailRegister(form) {
   });
 }
 
+
+/**
+ * Hiển thị thông báo lỗi hoặc thành công
+ * @param {HTMLElement} element - Element hiển thị thông báo
+ * @param {string} message - Nội dung thông báo
+ * @param {string} color - Màu sắc (red/green)
+ */
 function showMessage(element, message, color) {
   element.innerText = message;
   element.style.color = color;

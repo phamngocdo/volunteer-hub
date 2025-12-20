@@ -15,6 +15,7 @@ class User(Base):
     phone_number = Column(String(100))
     role = Column(String(20))  # volunteer | manager | admin
     status = Column(String(20))  # active | banned | pending
+    avatar_url = Column(String(255))
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -25,3 +26,5 @@ class User(Base):
     comments = relationship("Comment", back_populates="user")
     reacts = relationship("React", back_populates="user")
     notifications = relationship("Notification", back_populates="user")
+    push_subscriptions = relationship("PushSubscription", back_populates="user")
+

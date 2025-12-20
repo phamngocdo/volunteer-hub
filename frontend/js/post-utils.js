@@ -1,3 +1,8 @@
+/**
+ * @file: post-utils.js
+ * @description: Các hàm tiện ích dùng chung cho bài viết (format thời gian, xử lý thả cảm xúc).
+ */
+
 const reactions = {
   like: { img: "/assets/like.png", text: "Thích", color: "#1877f2" },
   love: { img: "/assets/love.png", text: "Yêu thích", color: "#f33e58" },
@@ -7,6 +12,11 @@ const reactions = {
   angry: { img: "/assets/angry.png", text: "Phẫn nộ", color: "#e9710f" },
 };
 
+/**
+ * Format thời gian đăng bài thành dạng "X phút trước", "Y giờ trước" hoặc ngày tháng
+ * @param {string} createdAt - Thời gian tạo (ISO string)
+ * @returns {string} - Chuỗi thời gian đã format
+ */
 export function formatTimeAgo(createdAt) {
   const created = new Date(createdAt);
   const now = new Date();
@@ -31,6 +41,10 @@ export function formatTimeAgo(createdAt) {
   }
 }
 
+/**
+ * Gắn sự kiện (event listeners) cho các nút tương tác (Like, Popup cảm xúc) trong 1 bài viết
+ * @param {HTMLElement} postElement - DOM element của bài viết
+ */
 export function attachReactions(postElement) {
   const postId = postElement.dataset.postId;
   const likeBtn = postElement.querySelector(".like-btn");
@@ -174,6 +188,11 @@ export function attachReactions(postElement) {
 
 // =================== API CALLS ===================
 
+/**
+ * Gọi API gửi cảm xúc (React)
+ * @param {string} postId - ID bài viết
+ * @param {string} category - Loại cảm xúc (like, love, haha...)
+ */
 export async function sendReaction(postId, category) {
   const token = localStorage.getItem("access_token");
   const token_type = localStorage.getItem("token_type");
@@ -204,6 +223,10 @@ export async function sendReaction(postId, category) {
   }
 }
 
+/**
+ * Gọi API gỡ cảm xúc (Un-react)
+ * @param {string} postId - ID bài viết
+ */
 export async function removeReaction(postId) {
   const token = localStorage.getItem("access_token");
   const token_type = localStorage.getItem("token_type");

@@ -1,4 +1,16 @@
-import { initHeader } from "./main.js";
+/**
+ * @file: login.js
+ * @description: Xử lý logic cho trang Đăng nhập.
+ */
+
+import { initHeader, getTokenPayload } from "/js/main.js";
+
+if (getTokenPayload()) {
+  window.location.href = "/";
+} else {
+  initLoginPage();
+}
+
 function initLoginPage() {
   const form = document.querySelector(".login-form");
 
@@ -12,6 +24,10 @@ function initLoginPage() {
 }
 
 
+/**
+ * Khởi tạo form đăng nhập và xử lý sự kiện submit
+ * @param {HTMLElement} form - Element form đăng nhập
+ */
 function initEmailLogin(form) {
   const emailInput = form.querySelector("#email");
   const passwordInput = form.querySelector("#password");
@@ -52,8 +68,6 @@ function initEmailLogin(form) {
         const data = await res.json();
         localStorage.setItem("access_token", data.access_token);
         localStorage.setItem("token_type", data.token_type);
-        localStorage.setItem("role", data.role);
-        localStorage.setItem("status", data.status);
         initHeader();
         window.location.href = "/";
       } else if (res.status === 401) {
@@ -77,4 +91,3 @@ function showError(element, message) {
   element.style.display = "block";
 }
 
-initLoginPage();

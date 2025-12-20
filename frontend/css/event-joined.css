@@ -1,3 +1,8 @@
+/**
+ * @file: event-joined.css
+ * @description: Style cho trang 'Đã tham gia' (kế thừa từ event-wall.css).
+ */
+
 @import url("./event-wall.css");
 
 /* Ẩn phần tab, vì trang này không có */

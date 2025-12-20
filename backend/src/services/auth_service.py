@@ -1,16 +1,8 @@
-import string
-import secrets
 import traceback
-import random
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
-
-from src.config.db_config import Base
-from src.config.redis_config import redis_client
 from src.models.user_model import User
 from src.utils.security import hash_password, verify_password, create_access_token
-from src.utils.gmail_sender import send_email_verification_code
-
 
 class AuthService:
     @staticmethod
@@ -26,22 +18,21 @@ class AuthService:
             if not user or not verify_password(password, user.password):
                 raise ValueError("Invalid email or password")
             
-            access_token = create_access_token(data={"sub": str(user.user_id)})
+            access_token = create_access_token(
+                data={
+                    "sub": str(user.user_id),
+                    "role": user.role,
+                    "status": user.status,
+                    "avatar_url": user.avatar_url
+
+                }
+            )
             return {
                 "access_token": access_token,
-                "token_type": "bearer",
-                "user": {
-                    "user_id": user.user_id,
-                    "email": user.email,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "role": user.role,
-                    "status": user.status
-                }
             }
         except Exception as e:
             traceback.print_exc()
-            raise
+            raise e
 
 
     @staticmethod
@@ -58,8 +49,8 @@ class AuthService:
             if user_email:
                 raise ValueError("Email đã được sử dụng")
             
-            phone_number = db.query(User).filter(User.phone_number == phone_number).first()
-            if phone_number:
+            existing_phone = db.query(User).filter(User.phone_number == phone_number).first()
+            if existing_phone:
                 raise ValueError("Số điện thoại đã được sử dụng")
             
             hash_pw = hash_password(password)
@@ -80,31 +71,4 @@ class AuthService:
             
         except Exception as e:
             traceback.print_exc()
-            raise 
-
-class CodeAlreadySentException(Exception):
-    def __init__(self, detail: str):
-        self.detail = detail
-
-class VerificationCodeService:
-    @staticmethod
-    async def send_code(email: str):
-        existing_code = redis_client.get(f"verify: {email}")
-        if existing_code:
-            return CodeAlreadySentException(detail="Verification code already sent. Please wait before retrying.")
-        
-        characters = string.ascii_letters + string.digits 
-        code = ''.join(random.choices(characters, k=6))
-        await redis_client.set(f"verify:{email}", code, ex=120)
-        await send_email_verification_code(to_email=email, verification_code=code)
-
-
-    @staticmethod
-    async def verify_code(email: str, code: str) -> bool:
-        stored_code = await redis_client.get(f"verify:{email}")
-        return stored_code == code
-
-    @staticmethod
-    async def delete_code(email: str):
-        await redis_client.delete(f"verify:{email}")
-
+            raise e 

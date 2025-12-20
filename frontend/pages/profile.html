@@ -3,53 +3,75 @@
 
 <div class="profile-container animate-form">
   <h1>Cập nhật thông tin</h1>
-  <form id="profileForm" novalidate autocomplete="off">
+  <div class="profile-grid">
+    <div class="avatar-panel">
+      <div class="avatar-preview" id="avatarPreview">
+        <img src="/assets/default-avatar.png" alt="Avatar" id="avatarImage" />
+      </div>
+      <div class="avatar-actions">
+        <label for="avatarInput" class="btn-upload">
+          <i class="fa-solid fa-upload"></i> Tải ảnh lên
+        </label>
+        <input type="file" id="avatarInput" name="avatar" accept="image/*" />
+        <button type="button" class="btn-remove" id="removeAvatar">
+          <i class="fa-solid fa-trash"></i> Xóa ảnh
+        </button>
+      </div>
+    </div>
 
-    <div class="form-row">
+    <form id="profileForm" class="profile-form" novalidate autocomplete="off">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="first_name"><strong>Họ</strong></label>
+          <input type="text" id="first_name" name="first_name" required autocomplete="off" />
+          <span class="error-message"></span>
+        </div>
+        <div class="form-group">
+          <label for="last_name"><strong>Tên</strong></label>
+          <input type="text" id="last_name" name="last_name" required autocomplete="off" />
+          <span class="error-message"></span>
+        </div>
+      </div>
+
       <div class="form-group">
-        <label for="first_name"><strong>Họ</strong></label>
-        <input type="text" id="first_name" name="first_name" required autocomplete="off" />
+        <label for="email"><strong>Email</strong></label>
+        <input type="email" id="email" name="email" required autocomplete="off" disabled />
         <span class="error-message"></span>
       </div>
+
       <div class="form-group">
-        <label for="last_name"><strong>Tên</strong></label>
-        <input type="text" id="last_name" name="last_name" required autocomplete="off" />
+        <label for="phone_number"><strong>Số điện thoại</strong></label>
+        <input type="tel" id="phone_number" name="phone_number" pattern="^0\d{9}$" autocomplete="off" required />
         <span class="error-message"></span>
       </div>
-    </div>
 
-    <div class="form-group">
-      <label for="email"><strong>Email</strong></label>
-      <input type="email" id="email" name="email" required autocomplete="off" disabled />
-      <span class="error-message"></span>
-    </div>
+      <div class="form-group password-group">
+        <label for="old_password"><strong>Mật khẩu cũ</strong></label>
+        <input type="password" id="old_password" name="old_password" autocomplete="new-password" />
+        <i class="fa-solid fa-eye toggle-password"></i>
+        <span class="error-message"></span>
+      </div>
 
-    <div class="form-group">
-      <label for="phone_number"><strong>Số điện thoại</strong></label>
-      <input type="tel" id="phone_number" name="phone_number" pattern="^0\d{9}$" autocomplete="off" required />
-      <span class="error-message"></span>
-    </div>
+      <div class="form-group password-group">
+        <label for="new_password"><strong>Mật khẩu mới</strong></label>
+        <input type="password" id="new_password" name="new_password" autocomplete="new-password" />
+        <i class="fa-solid fa-eye toggle-password"></i>
+        <span class="error-message"></span>
+      </div>
 
-    <div class="form-group password-group">
-      <label for="old_password"><strong>Mật khẩu cũ</strong></label>
-      <input type="password" id="old_password" name="old_password" autocomplete="new-password" />
-      <i class="fa-solid fa-eye toggle-password"></i>
-      <span class="error-message"></span>
-    </div>
-    <div class="form-group password-group">
-      <label for="new_password"><strong>Mật khẩu mới</strong></label>
-      <input type="password" id="new_password" name="new_password" autocomplete="new-password" />
-      <i class="fa-solid fa-eye toggle-password"></i>
-      <span class="error-message"></span>
-    </div>
-    <div class="form-group password-group">
-      <label for="confirm_password"><strong>Xác nhận mật khẩu mới</strong></label>
-      <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" />
-      <i class="fa-solid fa-eye toggle-password"></i>
-      <span class="error-message"></span>
-    </div>
-    <div id="form-error" class="form-error"></div>
+      <div class="form-group password-group">
+        <label for="confirm_password"><strong>Xác nhận mật khẩu mới</strong></label>
+        <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" />
+        <i class="fa-solid fa-eye toggle-password"></i>
+        <span class="error-message"></span>
+      </div>
 
-    <button type="submit" class="btn-submit">Cập nhật</button>
-  </form>
+      <div id="form-error" class="form-error"></div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-submit">Cập nhật</button>
+      </div>
+    </form>
+
+  </div>
 </div>

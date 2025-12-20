@@ -10,7 +10,7 @@ class EventRegistration(Base):
     registration_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     event_id = Column(Integer, ForeignKey("events.event_id"))
     user_id = Column(Integer, ForeignKey("users.user_id"))
-    status = Column(String(20))  # pending | approved | rejected | cancelled | completed
+    status = Column(String(20))  # pending | approved | rejected | cancel
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
 

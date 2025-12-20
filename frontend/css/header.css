@@ -1,3 +1,12 @@
+/**
+ * @file: header.css
+ * @description: Style cho thanh điều hướng (Header), bao gồm menu, logo và user dropdown.
+ */
+
+/* =========================================
+   Header Layout
+   Cấu trúc chung của header
+   ========================================= */
 .site-header {
   width: 100%;
   background-color: var(--bg);
@@ -38,6 +47,11 @@
   font-weight: 600;
 }
 
+
+/* =========================================
+   Navigation Menu
+   Menu điều hướng chính
+   ========================================= */
 .main-nav {
   order: 2;
   flex: 1;
@@ -68,6 +82,11 @@
   background: rgba(0, 0, 0, 0.04);
 }
 
+
+/* =========================================
+   Header Actions & Buttons
+   Các nút chức năng (Login, Register)
+   ========================================= */
 .actions {
   order: 3;
   display: flex;
@@ -119,6 +138,11 @@
   display: none;
 }
 
+
+/* =========================================
+   User Area & Notifications
+   Khu vực hiển thị avatar và thông báo
+   ========================================= */
 .user-area {
   display: flex;
   align-items: center;
@@ -148,6 +172,88 @@
   border-radius: 50%;
   pointer-events: none;
 }
+
+.notification-dropdown {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 340px;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: auto;
+  max-height: 320px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  z-index: 2000;
+  animation: dropdownFade 0.18s ease-out;
+}
+
+.notification-dropdown::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.notification-dropdown::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 6px;
+}
+
+.notification-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #b5b5b5;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification-dropdown.hidden {
+  display: none;
+}
+
+.ntf-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f3f3f3;
+  transition: background 0.15s;
+}
+
+.ntf-item:last-child {
+  border-bottom: none;
+}
+
+.ntf-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 3px;
+  color: #1a1a1a;
+}
+
+.ntf-message {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.ntf-time {
+  font-size: 11px;
+  color: #888;
+}
+
+
+.ntf-empty {
+  padding: 20px;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+}
+
 
 .user-avatar {
   width: 36px;
@@ -208,6 +314,11 @@
 }
 
 
+
+/* =========================================
+   Responsive Header
+   Menu toggle cho mobile
+   ========================================= */
 @media (max-width: 1000px) {
   .header-container {
     display: flex;

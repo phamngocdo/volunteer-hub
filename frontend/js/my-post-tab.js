@@ -1,5 +1,14 @@
-import { formatTimeAgo, attachReactions } from "./post-utils.js";
+/**
+ * @file: my-post-tab.js
+ * @description: Logic tải và hiển thị danh sách bài viết của chính người dùng (Tab "Bài viết của tôi").
+ */
 
+import { formatTimeAgo, attachReactions } from "/js/post-utils.js";
+
+
+/**
+ * Tải danh sách bài viết của user hiện tại từ API
+ */
 export async function fetchMyPosts() {
   const container = document.getElementById("my-post");
   if (!container) return;
@@ -28,11 +37,16 @@ export async function fetchMyPosts() {
     container.innerHTML = `<p>Không thể tải bài viết của bạn.</p>`;
   }
 
+
+  /**
+   * Render danh sách bài viết của tôi ra giao diện
+   * @param {Array} posts - Mảng bài viết
+   */
   async function renderPosts(posts) {
     container.innerHTML = ""; // Xóa cũ
 
     // Đọc template HTML của 1 post (từ file event-post.html)
-    const response = await fetch("../../pages/event-post.html");
+    const response = await fetch("/pages/event-post.html");
     let postHTML = await response.text();
     const match = postHTML.match(/<div class="event-post">[\s\S]*<\/div>/);
     if (!match) {
@@ -60,8 +74,15 @@ export async function fetchMyPosts() {
       // Họ tên
       const fullName =
         (post.first_name || "") + (post.last_name ? ` ${post.last_name}` : "");
-      postElement.querySelector(".post-info h4").textContent =
-        fullName.trim() || `User ${post.user_id}`;
+
+      const authorName = fullName.trim() || `User ${post.user_id}`;
+      const headerEl = postElement.querySelector(".post-info h4");
+
+      if (post.event_title) {
+        headerEl.innerHTML = `${authorName} <i class="fa-solid fa-caret-right" style="font-size: 0.8em; color: #65676b; margin: 0 4px;"></i> ${post.event_title}`;
+      } else {
+        headerEl.textContent = authorName;
+      }
 
       // Thời gian (hiển thị theo “bao lâu trước”)
       postElement.querySelector(".post-info p").textContent = formatTimeAgo(

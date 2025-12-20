@@ -1,10 +1,27 @@
+/**
+ * @file: style.css
+ * @description: File style chung cho toàn bộ ứng dụng, định nghĩa các biến màu sắc và reset cơ bản.
+ */
+
+/* =========================================
+   Biến Global (CSS Variables)
+   Định nghĩa màu sắc chủ đạo
+   ========================================= */
 :root {
   --bg: #fff;
+  /* Màu nền chính */
   --fg: #000;
+  /* Màu chữ chính */
   --muted: #666;
+  /* Màu chữ phụ/nhạt */
   --accent: #000;
+  /* Màu nhấn */
 }
 
+/* =========================================
+   Reset & Base Styles
+   Thiết lập cơ bản cho tất cả các element
+   ========================================= */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -17,16 +34,24 @@ body {
   color: var(--fg);
 }
 
+/* =========================================
+   Main Container
+   Khung nội dung chính của trang
+   ========================================= */
 main {
   max-width: 1200px;
   margin: 20px auto;
   padding: 0 20px;
   min-height: 570px;
+  /* Chiều cao tối thiểu để đẩy footer xuống dưới */
 }
 
+/* =========================================
+   Responsive Global
+   ========================================= */
 @media (max-width: 945px) {
   html {
     font-size: 15px;
+    /* Giảm size chữ trên màn hình nhỏ */
   }
-
 }

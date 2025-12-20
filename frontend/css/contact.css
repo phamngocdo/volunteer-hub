@@ -1,3 +1,12 @@
+/**
+ * @file: contact.css
+ * @description: Style cho trang Liên hệ (Contact).
+ */
+
+/* =========================================
+   Contact Container
+   Layout chính trang liên hệ
+   ========================================= */
 .contact-container {
   font-family: "Poppins", sans-serif;
   color: #000;
@@ -96,6 +105,10 @@
   transform: translateY(-2px);
 }
 
+
+/* =========================================
+   Responsive
+   ========================================= */
 @media (max-width: 835px) {
   .contact-info {
     grid-template-columns: 1fr;

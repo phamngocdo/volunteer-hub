@@ -1,12 +1,13 @@
+/**
+ * @file: event-manager.js
+ * @description: Quản lý trang "Sự kiện của tôi" (cho Manager), bao gồm tạo mới, sửa, xóa sự kiện.
+ */
+
 import { navigateTo } from "./main.js";
 
-// Lấy token và token_type từ localStorage một lần
 const token = localStorage.getItem("access_token");
 const token_type = localStorage.getItem("token_type") || "Bearer";
-console.log("🕵️‍♂️ DEBUG: Token đã được tải.");
 
-// === DOM Elements Chung ===
-// === DOM Elements Chung ===
 let mainContainer;
 let deleteModal;
 let closeDeleteBtn;
@@ -14,7 +15,6 @@ let cancelDeleteBtn;
 let confirmDeleteBtn;
 let eventIdToDelete = null;
 
-// Modal Tạo/Sửa
 let createModal;
 let createForm;
 let closeCreateBtn;
@@ -24,22 +24,24 @@ let formTitle;
 let saveEventBtn;
 let eventIdToEdit = null;
 
-// DOM Elements MỚI cho Upload
 let imageFileInput;
 let filePickerBtn;
 let imagePreview;
 let uploadStatus;
 let hiddenImageUrlInput;
 
-// ===========================================
-// VIEW 1: DANH SÁCH SỰ KIỆN (Event List View)
-// ===========================================
+const STATUS_MAP = {
+  pending: "Chờ duyệt",
+  approved: "Đã duyệt",
+  rejected: "Từ chối",
+  completed: "Hoàn thành",
+};
+
 
 /**
- * Render HTML cho view danh sách sự kiện
+ * Render giao diện danh sách sự kiện
  */
 function renderEventListView() {
-  console.log("Đang render: View Danh sách sự kiện");
   mainContainer.innerHTML = `
     <div class="page-header">
       <h1>Sự kiện của tôi</h1>
@@ -58,8 +60,9 @@ function renderEventListView() {
   fetchMyEvents();
 }
 
+
 /**
- * Tải và hiển thị danh sách sự kiện
+ * Tải danh sách sự kiện do user hiện tại tạo
  */
 async function fetchMyEvents() {
   const container = document.getElementById("my-events-list");
@@ -69,7 +72,7 @@ async function fetchMyEvents() {
 
   try {
     const res = await fetch(
-      "http://localhost:8000/api/events/manager/my-events",
+      "http://localhost:8000/api/events/manager",
       {
         headers: { Authorization: `${token_type} ${token}` },
       }
@@ -85,8 +88,10 @@ async function fetchMyEvents() {
   }
 }
 
+
 /**
- * Render từng event item
+ * Render danh sách sự kiện ra HTML
+ * @param {Array} events - Danh sách sự kiện
  */
 function renderEvents(events) {
   const container = document.getElementById("my-events-list");
@@ -99,6 +104,7 @@ function renderEvents(events) {
   }
 
   events.forEach((ev) => {
+    const statusText = STATUS_MAP[ev.status] || ev.status;
     const eventElement = document.createElement("div");
     eventElement.className = "manager-event-item";
     eventElement.innerHTML = `
@@ -106,7 +112,7 @@ function renderEvents(events) {
         <h4>${ev.title}</h4>
         <p><i class="fa-solid fa-calendar-days"></i> ${formatDate(ev.start_date)}</p>
         <p><i class="fa-solid fa-users"></i> ${ev.volunteer_number} người đăng ký</p>
-        <p><span class="status status-${ev.status}">${ev.status}</span></p>
+        <p><span class="status status-${ev.status}">${statusText}</span></p>
       </div>
       <div class="event-actions">
         <a href="/event-user/${ev.event_id}" class="btn btn-secondary btn-admin-link">
@@ -121,7 +127,6 @@ function renderEvents(events) {
       </div>
     `;
 
-    // Gán listener cho các nút vừa tạo
     eventElement
       .querySelector(".btn-edit")
       .addEventListener("click", (e) =>
@@ -140,11 +145,10 @@ function renderEvents(events) {
   });
 }
 
-// ===========================================
-// LOGIC MODAL (Chung)
-// ===========================================
 
-// --- Logic Modal Xóa ---
+/**
+ * Mở modal xác nhận xóa sự kiện
+ */
 function openDeleteModal(id, title) {
   eventIdToDelete = id;
   document.getElementById("deleteConfirmMessage").textContent =
@@ -159,6 +163,10 @@ function closeDeleteModal() {
   eventIdToDelete = null;
 }
 
+
+/**
+ * Gửi request xóa sự kiện
+ */
 async function confirmDelete() {
   if (!eventIdToDelete) return;
   try {
@@ -175,7 +183,6 @@ async function confirmDelete() {
     }
     closeDeleteModal();
 
-    // Nếu đang ở trang quản lý đơn thì chuyển về event-manager
     if (window.location.pathname.startsWith("/event-user")) {
       navigateTo("event-manager");
     } else {
@@ -186,7 +193,10 @@ async function confirmDelete() {
   }
 }
 
-// --- Logic Modal Tạo/Sửa ---
+
+/**
+ * Mở modal tạo sự kiện mới (reset form)
+ */
 function openCreateModal() {
   eventIdToEdit = null;
   createForm.reset();
@@ -198,13 +208,17 @@ function openCreateModal() {
   createModal.style.display = "";
   createModal.classList.remove("hidden");
 
-  // Reset form upload
   imageFileInput.value = null;
   imagePreview.innerHTML = "<p>Chưa chọn ảnh nào.</p>";
   uploadStatus.textContent = "";
   hiddenImageUrlInput.value = "";
 }
 
+
+/**
+ * Mở modal sửa sự kiện (tải dữ liệu cũ và điền vào form)
+ * @param {number} id - ID sự kiện cần sửa
+ */
 async function openEditModal(id) {
   eventIdToEdit = id;
   createForm.reset();
@@ -226,15 +240,13 @@ async function openEditModal(id) {
     }
     const eventData = await res.json();
 
-    // Điền dữ liệu text
     document.getElementById("title").value = eventData.title;
     document.getElementById("description").value = eventData.description || "";
     document.getElementById("location").value = eventData.location || "";
-    document.getElementById("start_date").value = eventData.start_date;
-    document.getElementById("end_date").value = eventData.end_date;
+    document.getElementById("start_date").value = formatDateForInput(eventData.start_date);
+    document.getElementById("end_date").value = formatDateForInput(eventData.end_date);
     document.getElementById("category").value = eventData.category;
 
-    // Hiển thị ảnh bìa cũ
     imageFileInput.value = null;
     uploadStatus.textContent = "";
     if (eventData.image_url) {
@@ -263,6 +275,10 @@ function closeCreateModal() {
   eventIdToEdit = null;
 }
 
+
+/**
+ * Xử lý submit form tạo/sửa sự kiện
+ */
 async function handleFormSubmit(e) {
   e.preventDefault();
   formError.textContent = "";
@@ -275,13 +291,18 @@ async function handleFormSubmit(e) {
     title: formData.get("title")?.trim(),
     description: formData.get("description")?.trim(),
     location: formData.get("location")?.trim(),
-    start_date: formData.get("start_date"),
-    end_date: formData.get("end_date"),
+    start_date: parseDateFromInput(formData.get("start_date")),
+    end_date: parseDateFromInput(formData.get("end_date")),
     category: formData.get("category"),
     image_url: formData.get("image_url") || null,
   };
 
-  // Validation
+  if ((formData.get("start_date") && !eventData.start_date) || (formData.get("end_date") && !eventData.end_date)) {
+    formError.textContent = "Ngày không hợp lệ. Vui lòng nhập đúng định dạng dd/mm/yyyy (ví dụ: 25/12/2024).";
+    formError.style.display = "block";
+    return;
+  }
+
   if (
     !eventData.title ||
     !eventData.description ||
@@ -340,33 +361,22 @@ async function handleFormSubmit(e) {
   }
 }
 
-// ===========================================
-// === CÁC HÀM UPLOAD MỚI ĐƯỢC THÊM VÀO ĐÂY ===
-// ===========================================
-
-/**
- * Được gọi khi người dùng chọn 1 file
- */
 async function handleFileSelected(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  // 1. Hiển thị preview ngay lập tức
   const reader = new FileReader();
   reader.onload = (event) => {
     imagePreview.innerHTML = `<img src="${event.target.result}" alt="Xem trước" style="max-width: 100%; height: auto;">`;
   };
   reader.readAsDataURL(file);
 
-  // 2. Vô hiệu hóa nút "Lưu" và bắt đầu upload
   saveEventBtn.disabled = true;
   uploadStatus.textContent = "Đang chuẩn bị tải lên...";
 
   try {
-    // 3. Gọi hàm upload
     const finalUrl = await uploadFileToBackend(file);
 
-    // 4. Upload thành công
     uploadStatus.textContent = "Tải ảnh thành công!";
     hiddenImageUrlInput.value = finalUrl;
     saveEventBtn.disabled = false;
@@ -376,96 +386,87 @@ async function handleFileSelected(e) {
   }
 }
 
+
 /**
- * Xử lý logic upload file lên LOCAL BACKEND
+ * Upload file ảnh lên server
+ * @param {File} file - File ảnh
+ * @returns {Promise<string>} - URL ảnh sau khi upload
  */
 async function uploadFileToBackend(file) {
   const formData = new FormData();
   formData.append("file", file, file.name);
 
-  uploadStatus.textContent = "Đang tải ảnh lên (0%)...";
+  uploadStatus.textContent = "Đang tải ảnh lên...";
 
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "http://localhost:8000/api/events/upload_image", true);
-    xhr.setRequestHeader("Authorization", `${token_type} ${token}`);
-
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const percentComplete = Math.round((event.loaded / event.total) * 100);
-        uploadStatus.textContent = `Đang tải ảnh lên (${percentComplete}%)...`;
-      }
-    };
-
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          const response = JSON.parse(xhr.responseText);
-          if (response.final_url) {
-            resolve(response.final_url);
-          } else {
-            reject(new Error("Server không trả về 'final_url'."));
-          }
-        } catch (e) {
-          reject(new Error("Không thể phân tích phản hồi từ server."));
-        }
-      } else {
-        try {
-          const err = JSON.parse(xhr.responseText);
-          reject(new Error(err.detail || `Lỗi server: ${xhr.status}`));
-        } catch {
-          reject(new Error(`Lỗi server: ${xhr.status}`));
-        }
-      }
-    };
-
-    xhr.onerror = () => {
-      reject(new Error("Lỗi mạng khi đang upload file."));
-    };
-
-    xhr.send(formData);
+  const res = await fetch("http://localhost:8000/api/events/upload-image", {
+    method: "POST",
+    headers: {
+      Authorization: `${token_type} ${token}`,
+    },
+    body: formData,
   });
+
+  const response = await res.json();
+  if (response) {
+    return response;
+  } else {
+    throw new Error("Server không trả về 'final_url'.");
+  }
 }
 
-// === Hàm tiện ích ===
 function formatDate(dateStr) {
   if (!dateStr) return "Chưa có ngày";
   const [year, month, day] = dateStr.split("-");
   return `${day}/${month}/${year}`;
 }
 
-// === Khởi tạo trang ===
+function formatDateForInput(dateStr) {
+  if (!dateStr) return "";
+  const [year, month, day] = dateStr.split("-");
+  return `${day}/${month}/${year}`;
+}
+
+function parseDateFromInput(dateStr) {
+  if (!dateStr) return null;
+  const parts = dateStr.split("/");
+  if (parts.length !== 3) return null;
+  const [day, month, year] = parts;
+  if (!day || !month || !year) return null;
+  return `${year}-${month}-${day}`;
+}
+
+
+/**
+ * Khởi tạo trang quản lý sự kiện
+ */
 function initEventManagerPage() {
-
-
-
-  // ✅ BƯỚC 1: GÁN GIÁ TRỊ (QUERY DOM) KHI HÀM CHẠY
-  // Lỗi "TypeError" và "ReferenceError" của bạn sẽ được sửa ở đây
   mainContainer = document.querySelector(".manager-container");
 
-  // Modal Xóa
   deleteModal = document.getElementById("deleteConfirmModal");
-  closeDeleteBtn = deleteModal.querySelector(".modal-close-delete"); // Lỗi TypeError có thể ở đây
+  if (!deleteModal) {
+    throw new Error("Không tìm thấy modal xóa (deleteConfirmModal)");
+  }
+  closeDeleteBtn = deleteModal.querySelector(".modal-close");
   cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
   confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
-  
-  // Modal Tạo/Sửa
+
   createModal = document.getElementById("createEventModal");
+  if (!createModal) {
+    throw new Error("Không tìm thấy modal tạo (createEventModal)");
+  }
   createForm = document.getElementById("create-event-form");
-  closeCreateBtn = createModal.querySelector(".modal-close-create"); // Hoặc ở đây
+  closeCreateBtn = createModal.querySelector(".modal-close");
   cancelCreateBtn = document.getElementById("cancelCreateBtn");
   formError = document.getElementById("form-error");
   formTitle = document.getElementById("form-title");
   saveEventBtn = document.getElementById("saveEventBtn");
-  
-  // DOM Elements Upload
+
   imageFileInput = document.getElementById("image_file_input");
   filePickerBtn = document.getElementById("open-file-picker-btn");
   imagePreview = document.getElementById("image-preview");
   uploadStatus = document.getElementById("upload-status");
   hiddenImageUrlInput = document.getElementById("image_url");
 
-  // Gán listener cho các modal (chỉ 1 lần)
   closeDeleteBtn.addEventListener("click", closeDeleteModal);
   cancelDeleteBtn.addEventListener("click", closeDeleteModal);
   deleteModal.addEventListener("click", (e) => {
@@ -480,15 +481,16 @@ function initEventManagerPage() {
   });
   createForm.addEventListener("submit", handleFormSubmit);
 
-  // Gán listener cho UPLOAD
   filePickerBtn.addEventListener("click", () => {
-    imageFileInput.click(); 
+    imageFileInput.click();
   });
   imageFileInput.addEventListener("change", handleFileSelected);
 
-  // Render view danh sách sự kiện
   renderEventListView();
 }
 
-// Chạy hàm khởi tạo khi file được import
-initEventManagerPage();
+try {
+  initEventManagerPage();
+} catch (err) {
+  alert(`Lỗi khởi tạo trang quản lý: ${err.message}`);
+}

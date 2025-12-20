@@ -1,37 +1,11 @@
-export async function navigateTo(page) {
-  const main = document.getElementById("main-content");
+/**
+ * @file: joined-event-tab.js
+ * @description: Logic tải và hiển thị danh sách các sự kiện mà người dùng đã tham gia (Tab "Đã tham gia").
+ */
 
-  let path = `./pages/${page}.html`;
-  let scriptPath = `./js/${page}.js`;
-
-  // Nếu page dạng event-wall/joined/1
-  if (page.startsWith("event-wall/joined/")) {
-    path = `./pages/event-wall/event-joined.html`;
-    scriptPath = `./js/event-wall/event-joined.js`;
-  }
-
-  try {
-    const res = await fetch(path);
-    if (!res.ok) throw new Error(`Không tìm thấy file: ${path}`);
-    const html = await res.text();
-    main.innerHTML = html;
-
-    // Xóa script cũ
-    document.querySelectorAll(`script[data-page]`).forEach(s => s.remove());
-
-    // Load script mới
-    const script = document.createElement("script");
-    script.src = `${scriptPath}?cacheBust=${Date.now()}`;
-    script.type = "module";
-    script.dataset.page = page;
-    document.body.appendChild(script);
-
-    window.history.pushState({}, "", `/${page}`);
-  } catch (err) {
-    console.error("Lỗi load trang:", err);
-  }
-}
-
+/**
+ * Tải danh sách sự kiện đã tham gia từ API
+ */
 export async function fetchJoinedEvents() {
   const container = document.getElementById("joinedEventsContainer");
   if (!container) return;
@@ -67,9 +41,8 @@ export async function fetchJoinedEvents() {
         </div>
       `;
 
-      // dùng navigateTo()
       div.addEventListener("click", () => {
-        navigateTo(`event-wall/joined/${event.event_id}`);
+        window.location.href = `/event-wall/joined/${event.event_id}`;
       });
       container.appendChild(div);
     });

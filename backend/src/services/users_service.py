@@ -1,15 +1,14 @@
 import traceback
-from jwt import InvalidTokenError, ExpiredSignatureError
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy.future import select
 from src.models.user_model import User
 from src.models.registration_model import EventRegistration
-from typing import Optional, List
-from src.utils.security import decode_token, verify_password, hash_password
+from typing import List, Optional
+from src.utils.security import verify_password, hash_password, create_access_token
 
 class UserService():
     @staticmethod
-    async def get_user_by_id(user_id: int, db: Session):
+    async def get_user_by_id(db: Session, user_id: int):
         try:
             user = db.query(User).filter(User.user_id == user_id).first()
             if user:
@@ -18,46 +17,32 @@ class UserService():
                 return user_dict
         except Exception as e:
             traceback.print_exc()
-            raise 
+            raise e 
 
-    
+
     @staticmethod
-    async def get_user_by_email(email: str, db: Session):
+    async def get_all_users(db: Session):
         try:
-            user = db.query(User).filter(User.email == email).first()
-            if user:
+            users = db.query(User).all() 
+
+            result = []
+            for user in users:
                 user_dict = user.__dict__.copy()
                 user_dict.pop("password", None)
-                return user_dict
+                result.append(user_dict)
+
+            return result
+
         except Exception as e:
             traceback.print_exc()
-            raise 
+            raise e
 
     
     @staticmethod
-    async def get_current_user(token: str, db: Session):
+    async def update_user(db: Session, user_id: int, user_data: dict):
         try:
-            user_id = decode_token(token).get("sub")
             user = db.query(User).filter(User.user_id == user_id).first()
-            if user:
-                user_dict = user.__dict__.copy()
-                user_dict.pop("password", None)
-                return user_dict
-        except (ExpiredSignatureError, InvalidTokenError) as e:
-            raise
-        except Exception as e:
-            traceback.print_exc()
-            raise
-
-    
-    @staticmethod
-    async def update_current_user(token: str, user_data: dict, db: Session):
-        try:
-            user_id = decode_token(token).get("sub")
-            user = db.query(User).filter(User.user_id == user_id).first()
-            if not user:
-                raise ValueError("User not found")
-
+                        
             user_data = {k: v for k, v in user_data.items() if v not in [None, ""]}
 
             if "old_password" in user_data:
@@ -74,32 +59,56 @@ class UserService():
             db.commit()
             db.refresh(user)
 
-            user_dict = user.__dict__.copy()
-            user_dict.pop("password", None)
-            return user_dict
+            access_token = create_access_token(
+                data={
+                    "sub": str(user.user_id),
+                    "role": user.role,
+                    "status": user.status,
+                    "avatar_url": user.avatar_url
 
-        except (ExpiredSignatureError, InvalidTokenError):
-            raise ValueError("Invalid or expired token")
+                }
+            )
+            return {
+                "access_token": access_token,
+            }
+
         except Exception as e:
             traceback.print_exc()
-            raise ValueError(e)
+            db.rollback()
+            raise e 
+    
+
+    @staticmethod
+    async def update_user_status(db: Session, user_id: int, new_status: str):
+        try:
+            user = db.query(User).filter(User.user_id == user_id).first()
+
+            user.status = new_status
+            db.commit()
+            db.refresh(user)
+            user_dict = user.__dict__.copy()
+            user_dict.pop("password", None)
+
+            return user_dict
+
+        except Exception as e:
+            traceback.print_exc()
+            db.rollback()
+            raise e
         
     
     @staticmethod
     async def get_user_history(db: Session, user_id: int) -> List[EventRegistration]:
-        """
-        Lấy danh sách lịch sử đăng ký sự kiện của một người dùng.
-        """
         try:
             query = (
                 select(EventRegistration)
                 .where(EventRegistration.user_id == user_id)
-                .options(selectinload(EventRegistration.event)) # Tối ưu hóa: Tải sẵn thông tin event
-                .order_by(EventRegistration.created_at.desc()) # Sắp xếp theo ngày đăng ký mới nhất
+                .options(selectinload(EventRegistration.event)) 
+                .order_by(EventRegistration.created_at.desc())
             )
             
             result = db.execute(query)
             return result.scalars().all()
         except Exception as e:
             traceback.print_exc()
-            raise
+            raise e

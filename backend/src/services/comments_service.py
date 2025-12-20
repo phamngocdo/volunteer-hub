@@ -1,7 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy.future import select
 from fastapi import HTTPException
-from src.models.post_model import Post
 from src.models.user_model import User
 from src.models.comment_model import Comment
 import traceback
@@ -9,11 +7,7 @@ import traceback
 class CommentService:
     @staticmethod
     async def get_comments_by_post(db: Session, post_id: int):
-        """
-        Lấy tất cả comment theo post_id, kèm first_name, last_name của user
-        """
         try:
-            # join Comment và User
             comments = (
                 db.query(
                     Comment.comment_id,
@@ -44,27 +38,18 @@ class CommentService:
             return result
 
         except Exception as e:
+            traceback.print_exc()
             db.rollback()
-            raise
+            raise e
 
     @staticmethod
     async def create_comment(db: Session, post_id: int, user_id: int, content: str):
-        """
-        Tạo một comment mới và trả về kèm tên người bình luận (first_name, last_name) và comment_count.
-        """
         try:
-            # Kiểm tra bài post tồn tại
-            post = db.query(Post).filter(Post.post_id == post_id).first()
-            if not post:
-                raise HTTPException(status_code=404, detail="Post not found")
-        
-            # Tạo comment
             comment = Comment(post_id=post_id, user_id=user_id, content=content)
             db.add(comment)
             db.commit()
             db.refresh(comment)
             user = db.query(User.first_name, User.last_name).filter(User.user_id == user_id).first()
-            # Lấy comment_count mới nhất
             comment_count = db.query(Comment).filter(Comment.post_id == post_id).count()
 
             return {
@@ -78,9 +63,7 @@ class CommentService:
                 "comment_count": comment_count
             }
 
-        except HTTPException:
-            raise
-        except Exception:
+        except Exception as e:
             traceback.print_exc()
             db.rollback()
-            raise HTTPException(status_code=500, detail="Lỗi khi tạo bình luận")
+            raise e 

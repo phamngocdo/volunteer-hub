@@ -1,3 +1,11 @@
+/**
+ * @file: home.css
+ * @description: Style cho trang chủ (Dashboard), bao gồm bộ lọc và danh sách sự kiện.
+ */
+
+/* =========================================
+   Global Variables & Base
+   ========================================= */
 :root {
   --bg: #ffffff;
   --text: #222;
@@ -12,6 +20,11 @@ body {
   font-family: "Inter", sans-serif;
 }
 
+
+/* =========================================
+   Dashboard Header
+   Tiêu đề và bộ lọc tìm kiếm
+   ========================================= */
 .dashboard-title {
   font-size: 1.8rem;
   font-weight: bold;
@@ -139,6 +152,11 @@ body {
   }
 }
 
+
+/* =========================================
+   Events Grid
+   Lưới hiển thị các thẻ sự kiện
+   ========================================= */
 .events-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -196,6 +214,11 @@ body {
   font-weight: bold;
 }
 
+
+/* =========================================
+   Event Detail Modal
+   Popup hiển thị chi tiết sự kiện
+   ========================================= */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -256,11 +279,9 @@ body {
 .modal-image {
   width: 100%;
   aspect-ratio: 1.618 / 1;
-  border-radius: 10px;
   margin-top: 1.2rem;
   margin-bottom: 1.2rem;
   object-fit: cover;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
 }
 
 .modal-close {
@@ -311,6 +332,10 @@ body {
 }
 
 
+
+/* =========================================
+   Animations
+   ========================================= */
 @keyframes fadeIn {
   from {
     opacity: 0;

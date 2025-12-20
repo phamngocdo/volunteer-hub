@@ -1,12 +1,22 @@
-import { fetchJoinedEvents } from "./joined-event-tab.js";
-import { fetchMyPosts } from "./my-post-tab.js"
-import { formatTimeAgo, attachReactions } from "./post-utils.js";
+/**
+ * @file: event-wall.js
+ * @description: Quản lý logic cho trang Bảng tin (Event Wall), bao gồm hiển thị bài viết, tab chuyển đổi, và comment.
+ */
 
+import { fetchJoinedEvents } from "/js/joined-event-tab.js";
+import { fetchMyPosts } from "/js/my-post-tab.js"
+import { formatTimeAgo, attachReactions } from "/js/post-utils.js";
+import { getTokenPayload } from "/js/main.js";
+
+/**
+ * Khởi tạo logic cho các Tabs (Tất cả bài viết / Đã tham gia)
+ */
 export function initTabs() {
   const tabs = document.querySelectorAll(".tab-btn");
   const contents = document.querySelectorAll(".event-tab-content");
+  const user = getTokenPayload();
 
-  const role = localStorage.getItem("role");
+  const role = user.role;
   const joinedTab = document.querySelector('.tab-btn[data-tab="joined"]');
 
   if (joinedTab) {
@@ -17,7 +27,6 @@ export function initTabs() {
     }
   }
 
-  // Tabs chuyển đổi
   tabs.forEach((tab) => {
     tab.addEventListener("click", (e) => {
       e.preventDefault();
@@ -33,10 +42,9 @@ export function initTabs() {
         }
       });
 
-      // Cuộn trang về đầu khi chuyển tab
+      // Cuộn trang về đầ khi chuyển tab
       window.scrollTo({ top: 0, behavior: "smooth" });
 
-      // Nếu bấm tab "joined", gọi module
       if (target === "joined") {
         fetchJoinedEvents();
       } else if (target === "my-post") {
@@ -46,6 +54,10 @@ export function initTabs() {
   });
 }
 
+/**
+ * Khởi tạo trang danh sách bài viết
+ * Fetch dữ liệu từ API và render ra giao diện
+ */
 export function initPostsPage() {
   const container = document.getElementById("all");
   if (!container) return;
@@ -78,11 +90,14 @@ export function initPostsPage() {
     }
   }
 
+  /**
+   * Render danh sách bài viết lên DOM
+   * @param {Array} posts - Danh sách bài viết lấy từ API
+   */
   async function renderPosts(posts) {
-    container.innerHTML = ""; // Xóa cũ
+    container.innerHTML = "";
 
-    // Đọc template HTML của 1 post (từ file event-post.html)
-    const response = await fetch("../pages/event-post.html");
+    const response = await fetch("/pages/event-post.html");
     let postHTML = await response.text();
     const match = postHTML.match(/<div class="event-post">[\s\S]*<\/div>/);
     if (!match) {
@@ -91,7 +106,6 @@ export function initPostsPage() {
     }
     postHTML = match[0];
 
-    // Map cảm xúc giống attachReactions()
     const reactions = {
       like: { img: "/assets/like.png", text: "Thích", color: "#1877f2" },
       love: { img: "/assets/love.png", text: "Yêu thích", color: "#f33e58" },
@@ -107,34 +121,35 @@ export function initPostsPage() {
       const postElement = tempDiv.firstElementChild;
       postElement.dataset.postId = post.post_id;
 
-      // Họ tên
       const fullName =
         (post.first_name || "") + (post.last_name ? ` ${post.last_name}` : "");
-      postElement.querySelector(".post-info h4").textContent =
-        fullName.trim() || `User ${post.user_id}`;
 
-      // Thời gian (hiển thị theo “bao lâu trước”)
+      const authorName = fullName.trim() || `User ${post.user_id}`;
+      const headerEl = postElement.querySelector(".post-info h4");
+
+      if (post.event_title) {
+        headerEl.innerHTML = `${authorName} <i class="fa-solid fa-caret-right" style="font-size: 0.8em; color: #65676b; margin: 0 4px;"></i> ${post.event_title}`;
+      } else {
+        headerEl.textContent = authorName;
+      }
+
       postElement.querySelector(".post-info p").textContent = formatTimeAgo(
         post.created_at
       );
 
-      // Nội dung
       postElement.querySelector(".event-content").textContent = post.content;
 
-      // Ảnh
       const imgEl = postElement.querySelector(".event-img");
       if (post.images_url) {
         imgEl.src = post.images_url;
         imgEl.alt = "Post image";
       } else {
-        imgEl.style.display = "none"; // Không có ảnh thì ẩn
+        imgEl.style.display = "none";
       }
 
-      // --- Hiển thị số lượng react và comment ---
       const reactCountEl = postElement.querySelector(".react-count");
       const commentCountEl = postElement.querySelector(".comment-count");
 
-      // Ẩn nếu bằng 0 hoặc null
       if (post.react_count && post.react_count > 0) {
         reactCountEl.textContent = post.react_count.toString();
         reactCountEl.style.display = "inline";
@@ -150,7 +165,6 @@ export function initPostsPage() {
         commentCountEl.style.display = "none";
       }
 
-      // --- Thiết lập giao diện cảm xúc ban đầu ---
       const likeBtn = postElement.querySelector(".like-btn");
       const likeIcon = postElement.querySelector(".like-icon");
       const likeText = postElement.querySelector(".like-text");
@@ -163,20 +177,15 @@ export function initPostsPage() {
         likeText.style.color = reaction.color;
         likeBtn.classList.add("active");
       } else {
-        // Mặc định nếu chưa react
         likeIcon.src = "/assets/like-default.png";
         likeText.textContent = "Thích";
         likeText.style.color = "#65676b";
         likeBtn.classList.remove("active");
       }
-      // Gắn thông tin cảm xúc hiện tại để attachReactions() biết
       postElement.dataset.userReact = post.user_react || "default";
 
-
-      // --- Gắn vào container ---
       container.appendChild(postElement);
 
-      // --- Gắn sự kiện cảm xúc ---
       if (typeof attachReactions === "function") attachReactions(postElement);
     });
   }
@@ -184,8 +193,11 @@ export function initPostsPage() {
   fetchPosts();
 }
 
+/**
+ * Khởi tạo logic cho Overlay Comment (Popup chi tiết bài viết)
+ * Xử lý xem chi tiết, load comment và gửi comment mới
+ */
 export function initCommentsOverlay() {
-  // Nếu đã gắn listener rồi thì không gắn nữa
   if (window.commentOverlayInitialized) return;
   window.commentOverlayInitialized = true;
 
@@ -270,12 +282,10 @@ export function initCommentsOverlay() {
       }
     }
 
-    // Đóng overlay
     if (e.target.id === "closeOverlayBtn" || e.target.classList.contains("post-overlay")) {
       document.getElementById("postOverlay").classList.add("hidden");
     }
 
-    // Gửi bình luận
     if (e.target.id === "overlaySendBtn" || e.target.closest("#overlaySendBtn")) {
       const input = document.getElementById("overlayCommentInput");
       const commentList = document.getElementById("commentList");
@@ -311,13 +321,11 @@ export function initCommentsOverlay() {
         commentList.appendChild(div);
         input.value = "";
 
-        // === Lấy comment_count mới từ API (đảm bảo là số) ===
         const commentCount =
           typeof newComment.comment_count === "number"
             ? newComment.comment_count
             : parseInt(newComment.comment_count || "0", 10);
 
-        // === Cập nhật số comment ở bài post chính ===
         const mainPost = document.querySelector(`.event-post[data-post-id="${postId}"]`);
         if (mainPost) {
           const countEl = mainPost.querySelector(".comment-count");
@@ -330,7 +338,6 @@ export function initCommentsOverlay() {
           }
         }
 
-        // === Cập nhật số comment ở overlay ===
         const overlayPost = overlayContent.querySelector(".event-post");
         if (overlayPost) {
           const countEl = overlayPost.querySelector(".comment-count");
@@ -349,8 +356,6 @@ export function initCommentsOverlay() {
 
   });
 }
-// ======= HIỂN THỊ OVERLAY KHI BÌNH LUẬN =======
-
 
 initTabs();
 initPostsPage();

@@ -1,3 +1,12 @@
+/**
+ * @file: auth.css
+ * @description: File style cho các trang xác thực (Đăng nhập, Đăng ký).
+ */
+
+/* =========================================
+   Container & Layout
+   Bố cục chung cho trang login/register
+   ========================================= */
 .login-container {
   display: flex;
   justify-content: center;
@@ -25,6 +34,11 @@
   color: var(--fg);
 }
 
+
+/* =========================================
+   Form Elements
+   Style cho form và input
+   ========================================= */
 .login-form {
   display: flex;
   flex-direction: column;
@@ -106,6 +120,11 @@ select:hover {
   gap: 13px;
 }
 
+
+/* =========================================
+   Buttons
+   Style cho các nút bấm
+   ========================================= */
 .login-form .btn {
   font-size: 15px;
   font-weight: 600;
@@ -127,6 +146,11 @@ select:hover {
   background-color: #2c2c2c;
 }
 
+
+/* =========================================
+   Divider & Extra Links
+   Đường kẻ phân cách và liên kết phụ
+   ========================================= */
 .divider {
   color: var(--muted);
   font-size: 13px;
@@ -169,6 +193,11 @@ select:hover {
   text-decoration: underline;
 }
 
+
+/* =========================================
+   Responsive
+   Điều chỉnh hiển thị trên mobile
+   ========================================= */
 @media (max-width: 860px) {
   .login-box {
     padding: 30px 20px;

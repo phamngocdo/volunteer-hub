@@ -9,7 +9,7 @@ class Notification(Base):
 
     notification_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.user_id"))
-    event_id = Column(Integer, ForeignKey("events.event_id"))
+    event_id = Column(Integer, ForeignKey("events.event_id"), nullable=True)
     message = Column(Text)
     is_read = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
