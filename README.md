@@ -3,6 +3,13 @@
 ## 1. Giới thiệu
 Dự án này là bài tập lớn cho Khóa học Lập trình Ứng dụng web UET. **Volunteer Hub** là một nền tảng web được thiết kế để kết nối các tình nguyện viên với các tổ chức và sự kiện cộng đồng. Website cho phép các nhà quản lý (Manager) tạo và quản lý các sự kiện, trong khi các tình nguyện viên (Volunteer) có thể dễ dàng tìm kiếm, đăng ký và theo dõi các hoạt động thiện nguyện mà họ quan tâm. Mục tiêu của dự án là xây dựng một cộng đồng tình nguyện gắn kết, minh bạch và hiệu quả.
 
+Yêu cầu bài tập: https://itest.com.vn/lects/webappdev/mockproj/VolunteerHub.htm
+
+Một vài tài khoản trong dữ liệu công khai:
+- Admin: admin@gmail.com, password: ngocdo
+- Manager: manager@gmail.com, password: ngocdo
+- Volunteer: phamdo@gmail.com, password: ngocdo
+
 ## 2. Thành viên nhóm
 Dự án được thực hiện bởi nhóm 3 thành viên:
 1. Phạm Ngọc Đô - 22022154 - Leader

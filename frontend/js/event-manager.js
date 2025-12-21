@@ -250,10 +250,7 @@ async function openEditModal(id) {
     imageFileInput.value = null;
     uploadStatus.textContent = "";
     if (eventData.image_url) {
-      const imageUrl = eventData.image_url.startsWith("http")
-        ? eventData.image_url
-        : `http://localhost:8000${eventData.image_url}`;
-      imagePreview.innerHTML = `<img src="${imageUrl}" alt="Ảnh bìa hiện tại" style="max-width: 100%; height: auto;">`;
+      imagePreview.innerHTML = `<img src="${eventData.image_url}" alt="Ảnh bìa hiện tại" style="max-width: 100%; height: auto;">`;
       hiddenImageUrlInput.value = eventData.image_url;
     } else {
       imagePreview.innerHTML = "<p>Chưa chọn ảnh nào.</p>";
