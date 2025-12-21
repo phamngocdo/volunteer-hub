@@ -28,7 +28,9 @@ frontend_port = int(os.getenv("FRONTEND_PORT", 3000))
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory=ROOT_DIR / "frontend/public"), name="static")
+static_dir = ROOT_DIR / "frontend/public"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 app.add_middleware(
     CORSMiddleware,

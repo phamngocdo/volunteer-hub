@@ -80,7 +80,7 @@ Bạn có thể chạy dự án theo 2 cách: Thủ công hoặc sử dụng Doc
 1.  **Build và chạy container**:
     Mở terminal tại thư mục gốc và chạy lệnh:
     ```bash
-    docker-compose up --build
+    docker compose up --build
     ```
 
 2.  **Truy cập ứng dụng tại localhost**:
