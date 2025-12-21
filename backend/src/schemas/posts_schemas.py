@@ -24,6 +24,7 @@ class PostAllDetail(BaseModel):
     created_at: datetime
     first_name: str
     last_name: str
+    avatar_url: Optional[str] = None 
     event_title: Optional[str] = None
     react_count: int
     comment_count: int

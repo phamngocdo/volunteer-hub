@@ -121,6 +121,13 @@ export function initPostsPage() {
       const postElement = tempDiv.firstElementChild;
       postElement.dataset.postId = post.post_id;
 
+      const avatarImg = postElement.querySelector(".avatar");
+      if (post.avatar_url) {
+        avatarImg.src = post.avatar_url;
+      } else {
+        avatarImg.src = "/assets/default-avatar.png";
+      }
+
       const fullName =
         (post.first_name || "") + (post.last_name ? ` ${post.last_name}` : "");
 
@@ -259,8 +266,13 @@ export function initCommentsOverlay() {
         comments.forEach(c => {
           const div = document.createElement("div");
           div.classList.add("comment-item");
+
+          const avatarSrc = c.avatar_url
+            ? c.avatar_url
+            : "/assets/default-avatar.png";
+
           div.innerHTML = `
-            <img src="/assets/default-avatar.png" class="avatar-comment" alt="user" />
+            <img src="${avatarSrc}" class="avatar-comment" alt="user" />
             <div class="comment-content">
               <p><strong>${c.first_name} ${c.last_name}</strong> ${c.content}</p>
             </div>`;
@@ -313,8 +325,13 @@ export function initCommentsOverlay() {
         const newComment = await res.json();
         const div = document.createElement("div");
         div.classList.add("comment-item");
+
+        const avatarSrc = newComment.avatar_url
+          ? newComment.avatar_url
+          : "/assets/default-avatar.png";
+
         div.innerHTML = `
-        <img src="/assets/default-avatar.png" class="avatar-comment" alt="user" />
+            <img src="${avatarSrc}" class="avatar-comment" alt="user" />
         <div class="comment-content">
           <p><strong>${newComment.first_name} ${newComment.last_name}</strong> ${newComment.content}</p>
         </div>`;

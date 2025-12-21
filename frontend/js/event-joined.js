@@ -79,6 +79,13 @@ async function renderPosts(posts, container) {
 
     postElement.dataset.postId = post.post_id;
 
+    const avatarImg = postElement.querySelector(".avatar");
+    if (post.avatar_url) {
+      avatarImg.src = post.avatar_url;
+    } else {
+      avatarImg.src = "/assets/default-avatar.png";
+    }
+
     const fullName = (post.first_name || "") + (post.last_name ? ` ${post.last_name}` : "");
     postElement.querySelector(".post-info h4").textContent = fullName.trim() || `User ${post.user_id}`;
     postElement.querySelector(".post-info p").textContent = formatTimeAgo(post.created_at);
@@ -305,6 +312,42 @@ export function initSubmitPost(eventId) {
   });
 }
 
+/**
+ * Load avatar người dùng hiện tại
+ */
+async function loadCurrentUserAvatar() {
+  const avatarImg = document.getElementById("currentUserAvatar");
+  if (!avatarImg) return;
+
+  const token = localStorage.getItem("access_token");
+  const token_type = localStorage.getItem("token_type");
+  if (!token) return;
+
+  try {
+    const res = await fetch("http://localhost:8000/api/users/me", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `${token_type} ${token}`,
+      },
+    });
+
+    if (!res.ok) throw new Error("Không lấy được thông tin user");
+
+    const user = await res.json();
+
+    if (user.avatar_url) {
+      avatarImg.src = user.avatar_url;
+    } else {
+      avatarImg.src = "/assets/default-avatar.png";
+    }
+  } catch (err) {
+    console.error("Lỗi load avatar user:", err);
+    avatarImg.src = "/assets/default-avatar.png";
+  }
+}
+
+
 
 /**
  * Hiển thị thông báo Toast
@@ -334,6 +377,7 @@ export function showToast(message, duration = 3000, bgColor = "#333") {
 const pathSegments = window.location.pathname.split("/");
 currentEventId = pathSegments[pathSegments.length - 1] || pathSegments[pathSegments.length - 2];
 if (currentEventId && !isNaN(currentEventId)) {
+  loadCurrentUserAvatar();
   loadPostsByEvent(currentEventId);
   initCreatePostOverlay();
   initInputPost();
