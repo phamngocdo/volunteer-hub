@@ -58,15 +58,15 @@ Bạn có thể chạy dự án theo 2 cách: Thủ công hoặc sử dụng Doc
     ```
 
 2.  **Cấu hình môi trường**:
-    Tạo file `.env` từ file `.env.example` (nếu có) hoặc đảm bảo các biến môi trường cần thiết được thiết lập (VAPID keys cho WebPush, Database URL,...).
+    Tạo file `.env` từ file `.env.example` (nếu có) và đảm bảo các biến môi trường cần thiết được thiết lập (VAPID keys cho WebPush, Database URL,...). Lưu ý đổi secret key khi xác định phát triển thành sản của riêng mình do secret key trong example chỉ dùng để thử nghiệm với 3 tài khoản có sẵn.
 
-3.  **Khởi chạy Backend Server**:
+4.  **Khởi chạy Backend Server**:
     ```bash
     python backend/src/main.py
     ```
     Server sẽ chạy tại: `http://localhost:8000`
 
-4.  **Chạy Frontend**:
+5.  **Chạy Frontend**:
     ```bash
     cd frontend
     npm install
