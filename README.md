@@ -14,7 +14,7 @@ Một vài tài khoản trong dữ liệu công khai:
 Dự án được thực hiện bởi nhóm 3 thành viên:
 1. Phạm Ngọc Đô - 22022154 - Leader
 2. Nguyễn Quang Duy - 22022148 - Member
-3. Đoàn Đức Minh - 22022135 - Member
+3. Doãn Đức Minh - 22022135 - Member
 
 ## 3. Công nghệ sử dụng
 
